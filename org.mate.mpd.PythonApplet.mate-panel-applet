@@ -1,0 +1,10 @@
+[Applet Factory]
+Id=MpdPythonAppletFactory
+Location=/usr/local/libexec
+Name=MPD Client
+Description=MPD Client
+
+[MpdPythonApplet]
+Name=MPD Client
+Description=MPD Client
+Icon= play

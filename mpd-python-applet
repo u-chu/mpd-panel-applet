@@ -1,0 +1,750 @@
+#!/usr/bin/env python
+#
+
+#~ ./mpd-python-applet
+import gi
+gi.require_version("Gtk", "2.0")
+
+from gi.repository import Gtk as gtk
+from gi.repository import MatePanelApplet
+#~ from gi.repository import GdkPixbuf
+from gi.repository import GObject as gobject
+from gi.repository import Notify as pynotify
+import mpd
+import time, os
+from gettext import gettext as _
+import gettext
+
+eb5=gtk.EventBox()
+eb3=gtk.EventBox()
+eb1=gtk.EventBox()
+eb2=gtk.EventBox()
+eb4=gtk.EventBox()
+#~ from gi.repository import Notify
+
+#~ import pygtk, sys, mateapplet, gtk, subprocess
+
+cdir=os.path.expanduser('~/.covers/')
+APP_IND='MpdPythonAppletFactory'
+DIR="locale"
+addr='localhost'
+port=6600
+#~ cl=gtk.Label("00:00:00  ")
+#~ al=gtk.Label('  00:00:00  ')
+def lb_click(s,e):
+	print e
+lb=gtk.ProgressBar()
+lb.connect("clicked", lb_click)
+lb.set_text("00:00:00/00:00:00")
+lb.set_size_request(150,2)
+pynotify.init(APP_IND)
+notif=pynotify.Notification()
+cc="#0000FF"
+cp="#FF0000"
+gettext.bindtextdomain(APP_IND+'.mo', DIR)
+gettext.textdomain(APP_IND)
+
+
+
+old_s=''
+old_id=''
+cur_s=''
+cur_id=''
+cur_stat=''
+old_stat=''
+
+class DE(gtk.Dialog):
+
+	def __init__(self, parent):
+		gtk.Dialog.__init__(self, "My Dialog", parent, gtk.DialogFlags.MODAL,
+			(gtk.STOCK_CANCEL, gtk.ResponseType.CANCEL,
+			gtk.STOCK_OK, gtk.ResponseType.OK))
+
+		self.set_default_size(250, 150)
+
+		#~ label = gtk.Label("This is a dialog to display additional information")
+
+		box = self.get_content_area()
+		#~ box.add(label)
+		table = gtk.Table(3, 1, False)
+		#~ table.set_row_spacing
+		box.add(table)
+		self.check1 = gtk.CheckButton(_("Show progressbar"))
+		table.attach(self.check1, 0,1 , 0, 1)
+		self.check2=gtk.CheckButton(_("Show text of duration in progressbar"))
+		table.attach(self.check2, 0, 1, 1, 2)
+		self.check3=gtk.CheckButton(_("Show text of current position in progressbar"))
+		table.attach(self.check3, 0, 1, 2, 3)
+		self.check1.connect("toggled", self.toggle_show_text, "SOME TEXT")
+		self.show_all()
+		
+	def toggle_show_text(self, e, data=None):
+		#~ print e
+		self.check2.set_sensitive(not e.get_active())
+		self.check1.set_sensitive(not e.get_active())
+
+class DB():
+	def __init__(self):
+		self.window=gtk.Window(gtk.WindowType.TOPLEVEL)
+		self.window.set_size_request(640, 480)
+		self.window.move(50,50)
+		sw2=gtk.ScrolledWindow()
+		sw2.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.ALWAYS)
+		vbox = gtk.VBox(False, 8)
+		vbox.pack_start(sw2, True, True, 0)	
+		self.store=gtk.TreeStore(str, str, str,str,str,str)
+		treeView = gtk.TreeView(model=self.store)
+		treeView.append_column(gtk.TreeViewColumn(_('Title'),gtk.CellRendererText(), markup=1))
+		treeView.append_column(gtk.TreeViewColumn(_('Artist'),gtk.CellRendererText(), markup=2))
+		treeView.append_column(gtk.TreeViewColumn(_('Album'),gtk.CellRendererText(), markup=3))
+		treeView.append_column(gtk.TreeViewColumn(_('Date'),gtk.CellRendererText(), markup=4))
+		treeView.append_column(gtk.TreeViewColumn(_('Duration'),gtk.CellRendererText(), markup=5))
+		sw2.add(treeView)
+		self.window.add(vbox)
+		self.window.show_all()
+		#~ treeView.expand_all()
+		self.filltree('Thrash', treeView)
+		#~ pass
+		
+	def filltree(self, rd, tw):
+		self.store.clear()
+		client = mpd.MPDClient()
+		try:
+			client.connect(addr, port)
+		except:
+			return
+		n=client.lsinfo(rd)
+		client.close()
+		client.disconnect()
+		dd1=None
+		if rd != '/':
+			dd1=self.store.append(None)
+			self.store.set_value(dd1,1,rd)
+		for i in n:
+			dd=self.store.append(dd1)
+			if i.items()[0][0]=='directory':
+				#~ d=[os.path.basename(i.items()[0][1]),'', '','','',]
+				#~ self.store.set_value(dd,0,i.items()[0][1])
+				a = i.items()[0][1].split('/')
+				if len(a)>1:
+					a=a[1]
+				self.store.set_value(dd,1,a)
+				self.store.set_value(dd,0,None)
+			else:
+				t=int(i.get('time'))
+				if t < 3600:
+					t=time.strftime("%M:%S", time.gmtime(t))
+				else:
+					t=time.strftime("%H:%M:%S", time.gmtime(t))
+				self.store.set_value(dd, 0, i.get('file', ''))	
+				self.store.set_value(dd,1,i.get('title',''))
+				self.store.set_value(dd,2,i.get('artist',''))
+				self.store.set_value(dd,3,i.get('album',''))
+				self.store.set_value(dd,4,i.get('date',''))
+				self.store.set_value(dd,5,t)	
+		tw.expand_all()		
+		
+	def on_click(self, a,b,c,stor):
+		print a,b,c, stor
+		(m,i)= a.get_selection().get_selected()
+		f= m[i][0]
+		if f==None:
+			print m[i][1], a
+			self.filltree(m[i][1], a)
+		else:
+			client = mpd.MPDClient()
+			try:
+				client.connect(addr, port)
+			except:
+				return
+			g=client.addid(f)
+			#~ client.playid(g)
+			print g
+			client.close()
+			client.disconnect()
+
+class PL():
+	def __init__(self, rs, cid):
+		self.window=gtk.Window(gtk.WindowType.TOPLEVEL)
+		self.window.set_size_request(640, 480)
+		self.window.move(50,50)
+		vbox = gtk.VBox(False, 8)
+		sw2=gtk.ScrolledWindow()
+		sw2.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.ALWAYS)
+		self.store=gtk.ListStore(object, str,str,str,str, str)
+		treeView = gtk.TreeView(model=self.store)
+		self.pbar = gtk.ProgressBar()
+		vbox.pack_start(sw2, True, True, 0)		
+		vbox.pack_start(self.pbar, False, False, 0)	
+		self.window.add(vbox)
+		treeView.append_column(gtk.TreeViewColumn(''))
+		treeView.append_column(gtk.TreeViewColumn(_('Title'),gtk.CellRendererText(), markup=1))
+		treeView.append_column(gtk.TreeViewColumn(_('Duration'),gtk.CellRendererText(), markup=2))
+		treeView.append_column(gtk.TreeViewColumn(_('Album'),gtk.CellRendererText(),  markup=3))
+		treeView.append_column(gtk.TreeViewColumn(_('Artist'),gtk.CellRendererText(), markup=4))
+		treeView.append_column(gtk.TreeViewColumn(_('Date'),gtk.CellRendererText(), markup=5))
+		#~ treeView.append_column(gtk.TreeViewColumn('Path',gtk.CellRendererText(), markup=6))
+		
+		sw2.add(treeView)
+		treeView.connect("row-activated", self.on_activated)
+		treeView.get_selection().set_mode(gtk.SelectionMode.MULTIPLE)
+		self.window.show_all()		
+		self.reloadpl(rs, cid)
+		gobject.timeout_add_seconds(2, self.cstatus)
+		
+	def reloadpl(self, rs, cid):		
+		#~ print cid
+		#~ pimg=None
+		self.store.clear()
+		ctime=0
+		self.slist=rs
+		for i in rs:
+			title, album, artist, date=getrecords(i)
+			#~ path=i['file']
+			time1=i['time']
+			try:	
+				tim=float(time1)
+				ctime+=tim
+			except: pass	
+			time1=time.strftime("%H:%M:%S", time.gmtime(float(time1)))
+			#~ print ctime
+			f=i['file']
+			if f==cid:
+				title='<b><span foreground=\"%s\">%s</span></b>'%(cp, title)
+				time1= '<b><span foreground=\"%s\">%s</span></b>'%(cp, time1)
+				album='<b><span foreground=\"%s\">%s</span></b>'%(cp, album)
+				artist='<b><span foreground=\"%s\">%s</span></b>'%(cp, artist)
+				date='<b><span foreground=\"%s\">%s</span></b>'%(cp, date)
+				#~ f='<b><span foreground=\"%s\">%s</span></b>'%(cp, os.path.dirname(f))
+				#~ pimg=gtk.Image.new_from_stock(gtk.STOCK_MEDIA_PLAY, 16)
+				#~ print pimg
+			else:
+					f=os.path.dirname(f)
+			self.store.append([i['id'], title, time1, album, artist, date])
+		
+		self.pbar.set_text(time.strftime("%H:%M:%S", time.gmtime(ctime)))
+		
+		
+	def cstatus(self):
+		#~ print 10
+		client = mpd.MPDClient()
+		try:
+			client.connect(addr, port)
+		except:
+			return	
+		#~ print 11
+		llist=client.playlistid()
+		cs=client.currentsong()
+		#~ print 12
+		cid=''
+		if len(cs)>0:
+			cid = client.currentsong()['file']
+		#~ print 13
+		client.close()
+		client.disconnect()	
+		if 	self.slist!=llist:
+			#~ print 1
+			self.reloadpl(llist, cid)
+		#~ print 2
+		return True
+		
+	def on_activated(self, widget, row, col):
+		model = widget.get_model()
+		#~ print model
+		id_s = model[row][0]
+		#~ print id_s
+		"""for i in range(1,5):
+			model[row][i]='<b><span foreground=\"%s\">%s</span></b>'%(cc, model[row][i])"""
+		client = mpd.MPDClient()
+		try:
+			client.connect(addr, port)
+		except:
+			return
+		client.playid(id_s)
+		client.close()
+		client.disconnect()
+		self.window.destroy()
+
+class SRes():
+	def __init__(self, rs, plid, cid):
+		self.window=gtk.Window(gtk.WindowType.TOPLEVEL)
+		self.window.set_size_request(640, 480)
+		self.window.move(50,50)
+		vbox = gtk.VBox(False, 8)
+		sw2=gtk.ScrolledWindow()
+		sw2.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.ALWAYS)
+		store=gtk.ListStore(object, str,str,str,str, str)
+		print cid
+		pimg=None
+		for i in rs:
+			title, album, artist, date=getrecords(i)
+			f=i['file']
+			if f==cid:
+				title='<b><span foreground=\"%s\">%s</span></b>'%(cp, title)
+				#~ print title
+				album='<b><span foreground=\"%s\">%s</span></b>'%(cp, album)
+				artist='<b><span foreground=\"%s\">%s</span></b>'%(cp, artist)
+				date='<b><span foreground=\"%s\">%s</span></b>'%(cp, date)
+				pimg=gtk.Image.new_from_stock(gtk.STOCK_MEDIA_PLAY, 16)
+				print pimg
+			else:	
+				for j in plid:				
+					if f == j['file']:
+						title='<b><span foreground=\"%s\">%s</span></b>'%(cc, title)
+						#~ print title
+						album='<b><span foreground=\"%s\">%s</span></b>'%(cc, album)
+						artist='<b><span foreground=\"%s\">%s</span></b>'%(cc, artist)
+						date='<b><span foreground=\"%s\">%s</span></b>'%(cc, date)
+						#~ print title
+			store.append([i, title,album,artist,date, os.path.dirname(f)])
+		treeView = gtk.TreeView(model=store)
+		
+		vbox.pack_start(sw2, True, True, 0)		
+		self.window.add(vbox)
+		treeView.append_column(gtk.TreeViewColumn(''))
+		treeView.append_column(gtk.TreeViewColumn(_('Title'),gtk.CellRendererText(), markup=1))
+		treeView.append_column(gtk.TreeViewColumn(_('Album'),gtk.CellRendererText(),  markup=2))
+		treeView.append_column(gtk.TreeViewColumn(_('Artist'),gtk.CellRendererText(), markup=3))
+		treeView.append_column(gtk.TreeViewColumn(_('Date'),gtk.CellRendererText(), markup=4))
+		treeView.append_column(gtk.TreeViewColumn(_('Path'),gtk.CellRendererText(), markup=5))
+		
+		#rend=gtk.CellRendererPixbuf()
+		#col = gtk.TreeViewColumn('',rend)
+		#treeView.append_column(col)
+		#col.pack_start(rend, expand=False)
+		#col.add_attribute(rend, 'pixbuf', 0)
+		#~ col.set_attributes(rend, pixbuf = self.ICON_COL)
+		
+		sw2.add(treeView)
+		#~ self.lab=gtk.Label()
+		#~ self.lab.set_size_request(-1,50)
+		#~ vbox.pack_end(self.lab, False, True,0)
+		treeView.connect("row-activated", self.on_activated)
+		treeView.get_selection().set_mode(gtk.SelectionMode.MULTIPLE)
+		self.window.show_all()
+		
+	def on_activated(self, widget, row, col):
+		model = widget.get_model()
+		#~ print model
+		text = model[row][0]['file']
+		for i in range(1,5):
+			model[row][i]='<b><span foreground=\"%s\">%s</span></b>'%(cc, model[row][i])
+		client = mpd.MPDClient()
+		try:
+			client.connect(addr, port)
+		except:
+			return
+		client.add(text)
+		client.close()
+		client.disconnect()
+
+
+def getrecords(i):
+	try:
+		artist=i['artist']
+	except KeyError:
+			artist = "Unknown Artist"
+	try:
+		album=i['album']
+	except KeyError:
+		album = "Unknown Artist"
+	try:
+		title=i['title']
+	except KeyError:
+		try:
+			title = i["file"].split("/")[-1]
+		except KeyError:
+			title= "Unknown Title"
+	try:
+		year=i['date']
+	except KeyError:
+		year = "Unknown Year"
+	lst=	[title, album, artist, year]
+	for i in lst:
+		if i.find('&')>0:
+			lst[lst.index(i)]=i.replace('&', '&amp;')
+	return lst
+	
+def get_mpd_status():
+	client = mpd.MPDClient()
+	try:
+	#if not isConnected(self):
+		client.connect(addr, port)
+	except:
+		#~ print 3
+		return ""
+	s=client.status()['state']
+	client.disconnect
+	client.close()
+	#~ print s
+	return s
+	
+def get_mpd_current():
+	client = mpd.MPDClient()
+	try:
+	#if not isConnected(self):
+		client.connect(addr, port)
+	except:
+		#~ print 3
+		return ""
+	s=client.currentsong()
+	client.disconnect
+	client.close()
+	#~ print s
+	return s	
+	
+def mpd_check_status():
+	global old_s
+	global cur_s
+	global old_stat
+	#~ global eb5
+	#~ global eb1
+	#~ global eb4
+	s=get_mpd_status()
+	#~ if s=='pause':
+	
+	"""if s=='pause':
+		eb5.hide()
+		eb1.show()
+		eb2.show()
+		eb3.show()
+	elif s=='stop':
+		eb4.hide()
+		eb5.hide()
+		eb1.show()
+		eb2.hide()
+		eb3.hide()
+	elif s=='play':
+		eb1.hide()
+		eb4.show()
+		eb2.show()
+		eb3.show()
+		eb5.show()"""
+			
+	if s=='pause' or s=='play':
+		t,p=get_mpd_pos()
+		#~ print t,p
+		lb.set_fraction(float(t)/float(p))
+		lb.set_text('%s/%s'%(time.strftime("%H:%M:%S", time.gmtime(float(t))), time.strftime("%H:%M:%S", time.gmtime(float(p)))))
+		cs=get_mpd_current()
+		#~ {'album': 'Hammer of Justice', 'title': 'Beginning of the End', 'track': '1', 'duration': '251.454', 'artist': 'Thor', 'pos': '78', 'last-modified': '2019-04-26T02:04:56Z', 'albumartist': 'Thor', 'file': '--current/Thor - 2019 - Hammer of Justice/01 - Beginning of the End.mp3', 'time': '251', 'date': '2019', 'genre': 'Heavy Metal', 'id': '134'}
+		cur_id=cs['id']
+		cur_s=cs['file']
+		#~ print cur_s, old_s		
+		if (cur_s != old_s) or ((s != old_stat) and s != 'stop'):			
+			title, album, artist, date=getrecords(cs)
+			icon=gtk.STOCK_MEDIA_PLAY
+			if os.path.exists(cdir+'/mpd.jpg'):
+				icon=cdir+'mpd.jpg'
+			title+=' ['+	time.strftime("%H:%M:%S", time.gmtime(float(p)))+']'
+			message="%s\n<i>%s</i> (%s)\n<b><i>%s</i></b>"%(artist,album, date, get_mpd_status())
+			notif.update(title, message, icon)
+			notif.show()
+			old_s=cur_s
+			old_stat=s
+	else:
+			lb.set_fraction(0)
+			lb.set_text("00:00:00/00:00:00")
+	#~ print 'mpd_check_status'
+	return True
+	
+gobject.timeout_add_seconds(1, mpd_check_status)
+#~ gobject.idle_add(mpd_check_status)	
+	
+def get_mpd_pos():
+	client = mpd.MPDClient()
+	try:
+	#if not isConnected(self):
+		client.connect(addr, port)
+	except:
+		#~ print 3
+		return ""
+	#~ print 	client.status()
+	p=client.status()['duration']
+	t=client.status()['elapsed']
+	client.disconnect
+	client.close()
+	#~ print s
+	return t,p
+	
+def make_dialog(s1):
+		dialog = gtk.MessageDialog(type=gtk.MessageType.QUESTION, buttons=gtk.ButtonsType.OK_CANCEL)
+		entry = gtk.Entry()
+		entry.set_text('darkology')
+		dialog.set_markup(_('Searching for:'))
+		db=dialog.get_content_area()
+		db.pack_end(entry, False, False,0)
+		dialog.set_title(s1)
+		entry.connect("activate", lambda _: dialog.response(gtk.ResponseType.OK))
+		dialog.set_default_response(gtk.ResponseType.OK)
+		dialog.show_all()
+		res=dialog.run()
+		txt=entry.get_text().encode('utf-8')
+		dialog.destroy()
+		return [res, txt]
+	
+def fsearchdb(e):
+	res, txt=make_dialog(_('Search in DB'))
+	if res!=gtk.ResponseType.OK:
+		return 2
+	client=mpd.MPDClient()
+	try:
+		client.connect(addr, port)
+	except:
+		return 1
+	rs=client.search('any',txt)
+	plid=client.playlistid()
+	cs=client.currentsong()
+	#~ print cs
+	if len(cs)>0:
+		cid = cs['file']
+	else:
+		cid=''
+	client.close()
+	client.disconnect()
+	if len(rs)<=0:
+		d=gtk.MessageDialog(type=gtk.MessageType.ERROR, message_format='"%s" not found'%txt, buttons=gtk.ButtonsType.CLOSE)
+		#d.connect("response", lambda *a: d.destroy())
+		d.run()
+		d.destroy()
+		return 3
+	SRes(rs, plid, cid)
+	#~ self.make_search_menu(rs)
+	return 0
+	#~ print rs
+	#print Gtk.ResponseType.OK
+	
+	
+def fplaylist(e):
+	#~ print "fplaylist1"
+	client = mpd.MPDClient()
+	try:
+		client.connect(addr, port)
+	except:
+		client.close()
+		client.disconnect()
+		#~ self.play_on_left_click(self)
+		return	
+	plid=client.playlistid()
+	#print plid
+	cid=''
+	cs=client.currentsong()
+	if len(cs)>0:
+		cid = client.currentsong()['file']
+	client.close()
+	client.disconnect()
+	if len(plid)<=0:
+		return[None,0]
+	#~ print "fplaylist2"	
+	PL(plid, cid)
+	return 0
+	
+	
+def applet_fill(applet):
+	#~ global eb5
+	#~ global eb1
+	#~ global eb4
+	p=applet.get_preferences_path()
+	#~ print p
+	hb=gtk.HBox()	
+	b1=gtk.Image(stock=gtk.STOCK_MEDIA_PLAY)
+	#~ eb1= 
+	eb1.add(b1)
+	eb1.connect('button-release-event', fplay)	
+	b2=gtk.Image(stock=gtk.STOCK_MEDIA_NEXT)
+	#~ eb2=gtk.EventBox()
+	eb2.add(b2)
+	eb2.connect('button-release-event', fnext)
+	b3=gtk.Image(stock=gtk.STOCK_MEDIA_PREVIOUS)
+	#~ eb3=gtk.EventBox()
+	eb3.add(b3)
+	eb3.connect('button-release-event', fprev)
+	b4=gtk.Image(stock=gtk.STOCK_MEDIA_STOP)
+	#~ eb4=gtk.EventBox()
+	eb4.add(b4)
+	eb4.connect('button-release-event', fstop)
+	b5=gtk.Image(stock=gtk.STOCK_MEDIA_PAUSE)
+	#~ eb5=gtk.EventBox()
+	eb5.add(b5)
+	eb5.connect('button-release-event', fpause)
+	
+	#~ s=get_mpd_status()
+	#~ print s
+
+	#~ elif s=='stop':
+		#~ b4.set_visible_window(False)
+		#~ b5.set_visible_window(False)
+	#~ elif s=='play':
+		#~ b1.set_visible_window(False)
+	
+	#~ s=get_mpd_status()
+
+	#~ hb.pack_start(cl, False, False, 0)
+	hb.pack_start(lb, False, False, 0)
+	#~ hb.pack_start(al, False, False, 0)
+	hb.pack_start(gtk.Label('  '), False, False, 0)
+	hb.pack_start(eb3, False, False, 0)
+	hb.pack_start(eb4, False, False, 0)
+	hb.pack_start(eb5, False, False, 0)
+	hb.pack_start(eb1, False, False, 0)
+	hb.pack_end(eb2, False, False, 0)
+	applet.add(hb)
+	
+	#~ <menuitem name="Play/Pause" action="Play/Pause" />
+	acts=[
+	("fprev1", 1001, _("Previous"), None, None, fprev1),
+	("fpause", 1002, _("Pause"), None, None, fpause),
+	("fstop1", 1003,_("Stop"), None, None, fstop1),
+	("fplay1", 1009,_("Play"), None, None, fstop1),
+	("fnext1", 1008,_("Next") , None, None, fplay),
+	("fsettings", 1005, _("Settings"), None, None, fsettings),
+	("fsearchdb", 1006, _("Search in DB"), None, None, fsearchdb),
+	('fplaylist', 1007, _('Playlist'), None, None, fplaylist),
+	('fdb', 1010, _('DB'), None, None, fdb),
+	]
+	propxml="""
+			<menuitem name="fprev1" action="fprev1" />			
+			<menuitem name="fstop1" action="fstop1" />
+			<menuitem name="fpause" action="fpause" />
+			<menuitem name="fplay1" action="fplay1" />
+			<menuitem name="fnext1" action="fnext1" />
+			<separator />
+			<menuitem name="fplaylist" action="fplaylist" />
+			<menuitem name="fdb" action="fdb" />
+			
+			<menuitem name="fsearchdb" action="fsearchdb"/>
+			<separator />
+			<menuitem name="fsettings" action="fsettings" />
+			"""
+			 #~ action="Search%20in%20DB" />
+	#~ verbs = [("About", showAboutDialog)]
+	#~ name, stock_id, label, accellerator, tooltip, callback
+	mpd_check_status()
+	
+	ag=gtk.ActionGroup.new("mpd_ag")
+	ag.add_actions(acts, None)
+	#~ verbs = [("About", ''), ('Close',''), ('Next',''),('Previous',''), ('Play',''), ('Stop', ''), ('Pause', ''), ('Settings', '')]
+	applet.setup_menu(propxml, ag)
+	applet.show_all()
+	#~ _IdleObject.__init__(None)
+	#~ return True
+
+def fsettings(e):
+	pass
+	
+def fdb(e):
+	DB()
+	
+def fpause (s, e):
+	client = mpd.MPDClient()
+	try:
+		client.connect(addr, port)
+	except:
+		client.close()
+		client.disconnect()
+		#~ self.play_on_left_click(self)
+		return	
+	status=client.status()['state']
+	if status=='pause':
+		client.play()
+		#~ self.ind.set_from_stock(gtk.STOCK_MEDIA_PLAY)
+	elif status=='play':
+		client.pause()
+		#~ self.ind.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
+		#~ exit_item.set_image(gtk.STOCK_QUIT,22))
+	client.close()
+	client.disconnect()
+	
+def fplay1(e):
+	fplay(None, e)
+	
+def fplay (s, e):
+	client = mpd.MPDClient()
+	try:
+		client.connect(addr, port)
+	except:
+		client.close()
+		client.disconnect()
+		#~ self.play_on_left_click(self)
+		return	
+	status=client.status()['state']
+	if status=='pause' or status=='stop':
+		client.play()
+		#~ self.ind.set_from_stock(gtk.STOCK_MEDIA_PLAY)
+	elif status=='play':
+		client.pause()
+		#~ self.ind.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
+		#~ exit_item.set_image(gtk.STOCK_QUIT,22))
+	client.close()
+	client.disconnect()
+	
+def fnext1(n):
+	fnext(None, n)
+	
+def fnext(s, n):
+	client = mpd.MPDClient()
+	try:
+		client.connect(addr, port)
+	except:
+		return
+	if client.status()['state']=='stop':
+		client.close()
+		client.disconnect()
+		return
+	client.next()
+	client.close()
+	client.disconnect()
+	
+def fprev1(n):
+	fprev(None, n)	
+	
+def fprev(s, n):
+	client = mpd.MPDClient()
+	try:
+		client.connect(addr, port)
+	except:
+		return
+	if client.status()['state']=='stop':
+		client.close()
+		client.disconnect()
+		return
+	client.previous()
+	client.close()
+	client.disconnect()
+	
+def fstop1(n):
+	fstop(None, n)
+	
+def fstop(s, n):
+	client = mpd.MPDClient()
+	try:
+		client.connect(addr, port)
+		client.stop()
+		client.close()
+		client.disconnect()	
+	except:
+		pass
+		
+def factory(applet, iid, data):
+	#~ if iid != "MpdPythonAppletFactory":
+		#~ print 1
+		#~ return False
+	global old_s
+	global cur_s
+	global cur_stat
+	global old_stat
+	old_s=''
+	cur_s=''
+	cur_stat=''
+	old_stat=''
+	applet_fill(applet)
+	return True		
+	
+	
+def showAboutDialog(*arguments, **keywords):
+	pass
+	#~ subprocess.call("mate-about")
+
+MatePanelApplet.Applet.factory_main("MpdPythonAppletFactory", True,
+                                    MatePanelApplet.Applet.__gtype__,
+                                    factory, None)

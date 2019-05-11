@@ -1,0 +1,93 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: mpd-applet\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-05-10 20:23+0500\n"
+"PO-Revision-Date: 2019-05-10 20:31+0500\n"
+"Last-Translator: \n"
+"Language-Team: LANGUAGE <ghola>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.6.10\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+#: mpd-python-applet:62 mpd-python-applet:146 mpd-python-applet:270
+msgid "Title"
+msgstr "Имя"
+
+#: mpd-python-applet:63 mpd-python-applet:149 mpd-python-applet:272
+msgid "Artist"
+msgstr "Исполнитель"
+
+#: mpd-python-applet:64 mpd-python-applet:148 mpd-python-applet:271
+msgid "Album"
+msgstr "Альбом"
+
+#: mpd-python-applet:65
+msgid "Year"
+msgstr "Дата"
+
+#: mpd-python-applet:66
+msgid "Duration"
+msgstr "Длительность"
+
+#: mpd-python-applet:147
+msgid "Time"
+msgstr "Длительность"
+
+#: mpd-python-applet:150 mpd-python-applet:273
+msgid "Date"
+msgstr "Дата"
+
+#: mpd-python-applet:274
+msgid "Path"
+msgstr "Путь"
+
+#: mpd-python-applet:435
+msgid "Searching for:"
+msgstr "Строка поиска"
+
+#: mpd-python-applet:448 mpd-python-applet:562
+msgid "Search in DB"
+msgstr "Искать в музыкальной базе"
+
+#: mpd-python-applet:556
+msgid "Previous"
+msgstr "Назад"
+
+#: mpd-python-applet:557
+msgid "Pause"
+msgstr "Пауза"
+
+#: mpd-python-applet:558
+msgid "Stop"
+msgstr "Стоп"
+
+#: mpd-python-applet:559
+msgid "Play"
+msgstr "Играть"
+
+#: mpd-python-applet:560
+msgid "Next"
+msgstr "Вперед"
+
+#: mpd-python-applet:561
+msgid "Settings"
+msgstr "Настройки"
+
+#: mpd-python-applet:563
+msgid "Playlist"
+msgstr "Плейлист"
+
+#: mpd-python-applet:564
+msgid "DB"
+msgstr "База музыки"
