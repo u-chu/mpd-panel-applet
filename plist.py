@@ -202,26 +202,14 @@ class PL():
 			f=m[i[0]][0]
 			print f			
 			#~ f=m[i][0]
+		client = mpd.MPDClient()	
 		try:
 			client.connect(common.addr, common.port)
 		except:
 			return
 		client.playid(f)
 		client.close()
-		client.disconnect()	
-		"""(m,i)=s.treeView.get_selection().get_selected()	
-		print m, i
-		f=m[i][0]
-		print f
-		client = mpd.MPDClient()
-		try:
-			client.connect(common.addr, common.port)
-		except:
-			return
-		client.playid(f)
-		client.close()
-		client.disconnect()"""
-		#~ pass	
+		client.disconnect()		
 		
 	def on_activated(self, widget, row, col):
 		self.play_item(None, widget, row, col)

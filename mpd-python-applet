@@ -299,8 +299,8 @@ def applet_fill(applet):
 	("fstop1", gtk.STOCK_MEDIA_STOP,_("Stop"), None, None, fstop1),
 	("fplay1", gtk.STOCK_MEDIA_PLAY,_("Play"), None, None, fstop1),
 	("fnext1", gtk.STOCK_MEDIA_NEXT,_("Next") , None, None, fplay),
-	("fsettings", None, _("Settings"), None, None, fsettings),
-	("fsearchdb", None, _("Search in DB"), None, None, fsearchdb),
+	("fsettings", gtk.STOCK_PROPERTIES, _("Settings"), None, None, fsettings),
+	("fsearchdb", gtk.STOCK_FIND, _("Search in DB"), None, None, fsearchdb),
 	('fplaylist', None, _('Playlist'), None, None, fplaylist),
 	('fdb', None, _('DB'), None, None, fdb),
 	]
