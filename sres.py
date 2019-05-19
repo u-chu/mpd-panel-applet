@@ -44,8 +44,9 @@ class SRes():
 						#~ print title
 			store.append([i, title,album,artist,date, os.path.dirname(f)])
 		treeView = gtk.TreeView(model=store)
-		
-		vbox.pack_start(sw2, True, True, 0)		
+		ts1=treeView.get_selection()
+		ts1.connect('changed', self.on_changed_selection)
+		#~ 		
 		self.window.add(vbox)
 		treeView.append_column(gtk.TreeViewColumn(''))
 		treeView.append_column(gtk.TreeViewColumn(_('Title'),gtk.CellRendererText(), markup=1))
@@ -53,7 +54,28 @@ class SRes():
 		treeView.append_column(gtk.TreeViewColumn(_('Artist'),gtk.CellRendererText(), markup=3))
 		treeView.append_column(gtk.TreeViewColumn(_('Date'),gtk.CellRendererText(), markup=4))
 		treeView.append_column(gtk.TreeViewColumn(_('Path'),gtk.CellRendererText(), markup=5))
+		acts=[
+		('add_items', gtk.STOCK_ADD, _('Add item(s)'), None, None, self.add_items),
+		]
+		xmlmenus="""
+		<ui>
+			<toolbar name='maintb'>
+				<toolitem action='add_items' />
+			</toolbar>
+		</ui>
+		"""
+		self.ag=gtk.ActionGroup.new("pl_ag")
 		
+		self.ag.add_actions(acts, None)
+		self.ag.list_actions()[0].set_sensitive(False)	
+		#~ self.ag.list_actions()[1].set_sensitive(False)
+		UIManager=gtk.UIManager()
+		self.window.add_accel_group(UIManager.get_accel_group())
+		UIManager.insert_action_group(self.ag,0)
+		UIManager.add_ui_from_string(xmlmenus)
+		self.toolbar = UIManager.get_widget('/maintb')
+		vbox.pack_start(self.toolbar, False, False, 0)
+		vbox.pack_start(sw2, True, True, 0)
 		#rend=gtk.CellRendererPixbuf()
 		#col = gtk.TreeViewColumn('',rend)
 		#treeView.append_column(col)
@@ -69,7 +91,17 @@ class SRes():
 		treeView.get_selection().set_mode(gtk.SelectionMode.MULTIPLE)
 		self.window.show_all()
 		
+	def add_items(s, e):
+		print e.get_proxies()
+		pass
+		
+	def on_changed_selection(s, e):
+		#~ print e.get_proxies()
+		(m,i)=e.get_selected_rows()
+		s.ag.list_actions()[0].set_sensitive(m!=None and i!=None)	
+		
 	def on_activated(self, widget, row, col):
+		#~ print widget.get_proxies()
 		model = widget.get_model()
 		#~ print model
 		text = model[row][0]['file']
