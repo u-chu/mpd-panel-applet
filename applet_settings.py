@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+
 import gi
 gi.require_version("Gtk", "2.0")
 
@@ -64,14 +67,15 @@ class DE(gtk.Dialog):
 		#~ print int(common.cp[1:], 16)
 		c=hex2rgb2(common.cp)
 		#~ print c[0]
-		self.check6=gtk.ColorButton.new_with_color(gdk.Color(red=c[0], green=c[1], blue=c[2]))
+		self.check6=gtk.ColorButton.new_with_color(gdk.Color(red=c[0]*255, green=c[1]*255, blue=c[2]*255))
 		box.pack_start(self.check6, False, False,0)
 		#~ common.cp))
 		#~ _("Color for song in already in playlist"))
 		#~ table.attach(self.check4, 0, 1, 5, 6)
 		c=hex2rgb2(common.cc)
+		#~ print c
 		#~ print c[0], c[1], c[2]
-		self.check7=gtk.ColorButton.new_with_color(gdk.Color(red=c[0], green=c[1], blue=c[2]))
+		self.check7=gtk.ColorButton.new_with_color(gdk.Color(red=c[0]*255, green=c[1]*255, blue=c[2]*255))
 		box.pack_start(self.check7, False, False,0)
 		#~ hex(common.cc))
 		#~ _("Color for corrent playing song"))
@@ -106,12 +110,14 @@ class DE(gtk.Dialog):
 		self.check1.set_sensitive(not e.get_active())
 		
 if __name__=="__main__":
-	gettext.bindtextdomain(common.APP_IND+'.mo', common.DIR)
-	gettext.textdomain(common.APP_IND)
+	print gettext.bindtextdomain(common.APP_IND+'.mo', './locale')
+	#~ common.DIR)
+	print gettext.textdomain(common.APP_IND)
 	p=DE(None)
 	p.connect("delete_event", lambda w,e: gtk.main_quit())
-	if p.run()==gtk.ResponseType.CANCEL:
-		p.hide()
-		p.destroy()
+	p.run()
+	#~ if p.run()==gtk.ResponseType.CANCEL:
+	p.hide()
+	p.destroy()
 		#~ gtk.main_quit()
 	gtk.main()

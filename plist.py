@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
+#~ import gtk, pygtk
 import gi
 gi.require_version("Gtk", "2.0")
 
@@ -87,18 +89,18 @@ class PL():
 		vbox.pack_start(sw2, True, True, 0)	
 		self.window.show_all()
 		self.window.set_focus(self.treeView)
-		"""treeView.enable_model_drag_source( gdk.ModifierType.BUTTON1_MASK,
+		"""self.treeView.enable_model_drag_source( gdk.ModifierType.BUTTON1_MASK,
 			self.TARGETS,
-			gdk.DragAction.MOVE|
-			gdk.DragAction.DEFAULT
+			gdk.DragAction.MOVE
+			|gdk.DragAction.DEFAULT
 			)
-		treeView.enable_model_drag_dest(
-			self.TARGETS,
+		self.treeView.enable_model_drag_dest(
+			self.TARGETS,gdk.DragAction.MOVE|
 			gdk.DragAction.DEFAULT)"""
 		
 	def remove_item(s, e):
 		print e
-		(m,i)=s.treeView.get_selection().get_selected_rows()
+		m,i=s.treeView.get_selection().get_selected_rows()
 		b=[]
 		d=[]
 		#~ f=m[i[0]][0]
@@ -106,16 +108,22 @@ class PL():
 		for k in i:
 			#~ print k.prepend_index
 			#~ print m.get_path(k)
+			iter=m.get_iter(k)
+			print iter
 			k=int(k.to_string())
 			#~ print k, i[k]
 			#~ print m[k][2], k
 			f= int(m[k][0])
 			#~ p= m[k][1]
 			b.append(f)
+			d.append(iter)
 			#~ d.append(p)
 		#~ except: 
 			#~ f=None
 		b.reverse()	
+		d.reverse()
+		for t in d:
+			m.remove(t)
 		client = mpd.MPDClient()
 		try:
 			client.connect(common.addr, common.port)
@@ -124,7 +132,7 @@ class PL():
 		for a in b:
 			client.deleteid(int(a))
 		client.close()
-		client.disconnect()	
+		client.disconnect()
 		#~ print b
 		#~ pass
 		
@@ -238,7 +246,13 @@ class PL():
 			context.finish(True, True, etime)
 		return	
 		
+	def clear_markup(s, l):
+		return l.replace('&amp;', '&').replace('<b>','').replace('</b>','') 
+		
 if __name__=="__main__":
+	#~ print 
+	#~ a=gtk.TargetEntry()
+	#~ b=gtk.TargetEntry.new()
 	gettext.bindtextdomain(common.APP_IND+'.mo', common.DIR)
 	gettext.textdomain(common.APP_IND)
 	client = mpd.MPDClient()

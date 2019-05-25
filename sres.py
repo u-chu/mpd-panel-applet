@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
 import gi
 gi.require_version("Gtk", "2.0")
 
 from gi.repository import Gtk as gtk
+#~ import pygtk, gtk
 import mpd
 from gettext import gettext as _
 import gettext, os
@@ -64,7 +66,7 @@ class SRes():
 			</toolbar>
 		</ui>
 		"""
-		self.ag=gtk.ActionGroup.new("pl_ag")
+		self.ag=gtk.ActionGroup("pl_ag")
 		
 		self.ag.add_actions(acts, None)
 		self.ag.list_actions()[0].set_sensitive(False)	
@@ -121,7 +123,7 @@ if __name__=="__main__":
 	gettext.textdomain(common.APP_IND)
 	client = mpd.MPDClient()
 	client.connect(common.addr, common.port)
-	rs=client.search('any','darkology')
+	rs=client.search('any','андем')
 	plid=client.playlistid()
 	cs=client.currentsong()
 	client.close()

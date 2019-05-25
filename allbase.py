@@ -1,11 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import gi
 gi.require_version("Gtk", "2.0")
 
 from gi.repository import Gtk as gtk
-from gi.repository import MatePanelApplet
+#~ from gi.repository import MatePanelApplet
 from gi.repository import GObject as gobject, Pango as pango
+
+#~ import gtk, pygtk, pango, gobject
 
 import mpd
 import time, os
@@ -97,7 +100,7 @@ class DB():
 		UIManager.insert_action_group(self.ag,0)
 		#~ UIManager.add_ui_from_string(popupxml)
 		UIManager.add_ui_from_string(mainxml)
-		self.popupmenu = UIManager.get_widget('/p')
+		#~ self.popupmenu = UIManager.get_widget('/p')
 		#~ self.mainmenu=UIManager.get_widget('/MB')
 		self.maintoolbar=UIManager.get_widget('/TB')
 		
@@ -112,9 +115,10 @@ class DB():
 		#~ print e
 		(m,i)=s.treeView.get_selection().get_selected_rows()
 		#~ print m, i
-		#~ print m, i
+		#~ print m, i[0]
 		try:
 			f= m[i[0]][0]
+			#~ print f
 		except TypeError:
 			f=None
 		p=m[i[0]][1]
@@ -123,7 +127,7 @@ class DB():
 		
 	def fupd_sel(s, n):
 		a=s.treeView.get_selection()
-		(m,i)=a.get_selected_rows()
+		m,i=a.get_selected_rows()
 		b=[]
 		d=[]
 		#~ print m, i
@@ -132,7 +136,9 @@ class DB():
 		for k in i:
 			#~ print k.prepend_index
 			#~ print m.get_path(k)
-			k=int(k.to_string())
+			#~ print k[0]
+			print k
+			#~ k=int(k[0])
 			#~ print k, i[k]
 			f= m[k][0]
 			p= m[k][1]
@@ -140,7 +146,7 @@ class DB():
 			d.append(p)
 		#~ except: 
 			#~ f=None
-		print b, d
+		#~ print b, d
 		client = mpd.MPDClient()
 		try:
 			client.connect(common.addr, common.port)
@@ -148,7 +154,8 @@ class DB():
 			return
 		if f==None or len(b)<=0:
 			for z in d:
-				client.update(z.replace('&amp;', '&'))
+				print z, client.update(s.clear_markup(z))
+				#~ .replace('&amp;', '&').replace('<b>','').replace('</b>',''))
 		#~ else:
 			#~ client.addid(f.replace('&amp;', '&'))
 		client.close()
@@ -167,25 +174,32 @@ class DB():
 		return res==gtk.ResponseType.YES
 		
 	def fadd_list(s, n):
-		a=s.treeView.get_selection()
+		#~ a=
 		#~ print a
-		(m,i)=a.get_selected()
+		m,i=s.treeView.get_selection().get_selected_rows()
 		#~ print m,i
-		f= m[i][0]
-		p=m[i][1]
-		w=f
-		if w==None:
-			w=p
+		#~ for k in i:
+			#~ print m.get_iter(k)[1]
+		a=[]	
 		client = mpd.MPDClient()
 		try:
 			client.connect(common.addr, common.port)
 		except:
 			return
-		if f==None: 
-			if s.confirm_add(w):
-				client.add(p)
-		else:
-			client.addid(f.replace('&amp;', '&'))
+		for k in i:	
+			f= m[k][0]
+			p=m[k][1]
+			#~ print f, p
+			w=p
+			#~ print f, p
+			if f==None:
+				if s.confirm_add(w):
+					client.add(s.clear_markup(p))
+					#~ .replace('&amp;', '&').replace('<b>', '').replace('</b>',''))
+					#~ a.append(p.replace('&amp;', '&'))
+			else:
+				client.addid(s.clear_markup(f))
+				#~ .replace('&amp;', '&').replace('<b>', '').replace('</b>',''))
 		client.close()
 		client.disconnect()
 		#~ print f, p
@@ -228,7 +242,12 @@ class DB():
 				#~ [1].split('/')
 				if len(a)>1:
 					a=a[1]
-				self.store.set_value(dd,1,a.replace('&','&amp;'))
+				b=	a.replace('&','&amp;').rsplit('/',1)
+				#~ print b
+				if len(b)<2:
+					self.store.set_value(dd,1,b[0])
+				else:	
+					self.store.set_value(dd,1,"%s/<b>%s</b>"%(b[0], b[1]))
 				#~ print a
 				self.store.set_value(dd,0,None)
 			else:
@@ -269,8 +288,9 @@ class DB():
 		p=m[i[0]][1][0:3:]
 		#~ print p
 		if p=='<b>':
-			p = m[i[0]][1][3:].replace('</b>', '').replace('&amp;', '&')
-			print p
+			p = self.clear_markup(m[i[0]][1][3:])
+			#~ .replace('</b>', '').replace('&amp;', '&')
+			#~ print p
 			if p.find('/')<=0:
 				p='/'
 			else:
@@ -282,8 +302,9 @@ class DB():
 			return
 		if f==None:
 			#~ print m[i][1], a
-			pp=m[i[0]][1].replace('&amp;', '&').replace('</b>', '').replace('<b>', '')
-			print pp
+			pp=self.clear_markup(m[i[0]][1])
+			#~ .replace('&amp;', '&').replace('</b>', '').replace('<b>', '')
+			#~ print pp
 			self.filltree(pp, a)
 		else:
 			client = mpd.MPDClient()
@@ -291,12 +312,16 @@ class DB():
 				client.connect(common.addr, common.port)
 			except:
 				return
-			print f	
-			g=client.addid(f.replace('&amp;', '&'))
+			#~ print f	
+			g=client.addid(self.clear_markup(f))
+			#~ .replace('&amp;', '&'))
 			#~ client.playid(g)
-			print g
+			#~ print g
 			client.close()
 			client.disconnect()
+			
+	def clear_markup(s, l):
+		return l.replace('&amp;', '&').replace('<b>','').replace('</b>','')
 			
 if __name__=="__main__":
 	gettext.bindtextdomain(common.APP_IND+'.mo', common.DIR)
