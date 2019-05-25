@@ -7,7 +7,7 @@ gi.require_version("Gtk", "2.0")
 
 from gi.repository import Gtk as gtk, Gdk as gdk
 from gi.repository import GObject as gobject, Pango as pango
-import mpd
+#~ import mpd
 import time, os
 from gettext import gettext as _
 import gettext
@@ -58,9 +58,7 @@ class PL():
 		sw2.add(self.treeView)
 		self.treeView.connect("row-activated", self.on_activated)
 		self.treeView.get_selection().set_mode(gtk.SelectionMode.MULTIPLE)
-				
-		self.reloadpl(rs, cid)
-		gobject.timeout_add_seconds(2, self.cstatus)
+
 		self.treeView.connect("drag_data_get", self.drag_data_get_data)
 		self.treeView.connect("drag_data_received", self.drag_data_received_data)
 		acts=[
@@ -73,6 +71,9 @@ class PL():
 				<toolitem action='play_item' />
 				<toolitem action='remove_item' />
 			</toolbar>
+			<accelerator action='r_up' />
+			<accelerator action='r_down' />
+			<accelerator action='remove_item' />
 		</ui>
 		"""
 		self.ag=gtk.ActionGroup.new("pl_ag")
@@ -87,8 +88,13 @@ class PL():
 		self.toolbar = UIManager.get_widget('/maintb')
 		vbox.pack_start(self.toolbar, False, False, 0)
 		vbox.pack_start(sw2, True, True, 0)	
+		self.sb=gtk.Statusbar()
+		self.sb.show_all()
+		vbox.pack_start(self.sb, False, False,0)
 		self.window.show_all()
 		self.window.set_focus(self.treeView)
+		self.reloadpl(rs, cid)
+		gobject.timeout_add_seconds(2, self.cstatus)
 		"""self.treeView.enable_model_drag_source( gdk.ModifierType.BUTTON1_MASK,
 			self.TARGETS,
 			gdk.DragAction.MOVE
@@ -124,15 +130,15 @@ class PL():
 		d.reverse()
 		for t in d:
 			m.remove(t)
-		client = mpd.MPDClient()
-		try:
-			client.connect(common.addr, common.port)
-		except:
-			return	
+		#~ client = mpd.MPDClient()
+		#~ try:
+			#~ client.connect(common.addr, common.port)
+		#~ except:
+			#~ return	
 		for a in b:
-			client.deleteid(int(a))
-		client.close()
-		client.disconnect()
+			common.mclient.deleteid(int(a))
+		#~ client.close()
+		#~ client.disconnect()
 		#~ print b
 		#~ pass
 		
@@ -171,27 +177,29 @@ class PL():
 			else:
 					f=os.path.dirname(f)
 			self.store.append([i['id'], title, time1, album, artist, date])
+		ctime=time.strftime(_("Play time: %H:%M:%S"), time.gmtime(float(ctime)))
+		self.sb.push(0,ctime)
 		
 		#~ self.pbar.set_text(time.strftime("%H:%M:%S", time.gmtime(ctime)))
 		
 		
 	def cstatus(self):
 		#~ print 10
-		client = mpd.MPDClient()
-		try:
-			client.connect(common.addr, common.port)
-		except:
-			return	
+		#~ client = mpd.MPDClient()
+		#~ try:
+			#~ client.connect(common.addr, common.port)
+		#~ except:
+			#~ return	
 		#~ print 11
-		llist=client.playlistid()
-		cs=client.currentsong()
+		llist=common.mclient.playlistid()
+		cs=common.mclient.currentsong()
 		#~ print 12
 		cid=''
 		if len(cs)>0:
-			cid = client.currentsong()['file']
+			cid = common.mclient.currentsong()['file']
 		#~ print 13
-		client.close()
-		client.disconnect()	
+		#~ client.close()
+		#~ client.disconnect()	
 		if 	self.slist!=llist:
 			#~ print 1
 			self.reloadpl(llist, cid)
@@ -210,14 +218,14 @@ class PL():
 			f=m[i[0]][0]
 			print f			
 			#~ f=m[i][0]
-		client = mpd.MPDClient()	
-		try:
-			client.connect(common.addr, common.port)
-		except:
-			return
-		client.playid(f)
-		client.close()
-		client.disconnect()		
+		#~ client = mpd.MPDClient()	
+		#~ try:
+			#~ client.connect(common.addr, common.port)
+		#~ except:
+			#~ return
+		common.mclient.playid(f)
+		#~ client.close()
+		#~ client.disconnect()		
 		
 	def on_activated(self, widget, row, col):
 		self.play_item(None, widget, row, col)
@@ -249,27 +257,31 @@ class PL():
 	def clear_markup(s, l):
 		return l.replace('&amp;', '&').replace('<b>','').replace('</b>','') 
 		
+	def quit(s, w, e):
+		common.mdisconnect()
+		gtk.main_quit()
+		
 if __name__=="__main__":
 	#~ print 
 	#~ a=gtk.TargetEntry()
 	#~ b=gtk.TargetEntry.new()
 	gettext.bindtextdomain(common.APP_IND+'.mo', common.DIR)
 	gettext.textdomain(common.APP_IND)
-	client = mpd.MPDClient()
+	#~ client = mpd.MPDClient()
 	#~ print client
-	client.connect(common.addr, common.port)
+	#~ client.connect(common.addr, common.port)
 	cid=''
-	cs=client.currentsong()
+	cs=common.mclient.currentsong()
 	#~ print cs
 	if len(cs)>0:
-		cid = client.currentsong()['file']
-	plid=client.playlistid()
+		cid = common.mclient.currentsong()['file']
+	plid=common.mclient.playlistid()
 	#print plid
 	
-	client.close()
-	client.disconnect()
+	#~ client.close()
+	#~ client.disconnect()
 	p=PL(plid, cid)
-	p.window.connect("delete_event", lambda w,e: gtk.main_quit())	
+	p.window.connect("delete_event", p.quit )	
 	#~ self.play_on_left_click(self)
 	#~ return	
 	

@@ -10,7 +10,7 @@ from gi.repository import GObject as gobject, Pango as pango
 
 #~ import gtk, pygtk, pango, gobject
 
-import mpd
+#~ import mpd
 import time, os
 from gettext import gettext as _
 import gettext, json
@@ -147,19 +147,21 @@ class DB():
 		#~ except: 
 			#~ f=None
 		#~ print b, d
-		client = mpd.MPDClient()
-		try:
-			client.connect(common.addr, common.port)
-		except:
+		#~ client = mpd.MPDClient()
+		#~ try:
+			#~ client.connect(common.addr, common.port)
+		#~ except:
+			#~ return
+		if not common.conn:
 			return
 		if f==None or len(b)<=0:
 			for z in d:
-				print z, client.update(s.clear_markup(z))
+				print z, common.mclient.update(s.clear_markup(z))
 				#~ .replace('&amp;', '&').replace('<b>','').replace('</b>',''))
 		#~ else:
 			#~ client.addid(f.replace('&amp;', '&'))
-		client.close()
-		client.disconnect()
+		#~ client.close()
+		#~ client.disconnect()
 		#~ print dir(n)
 		#~ pass
 		
@@ -181,11 +183,11 @@ class DB():
 		#~ for k in i:
 			#~ print m.get_iter(k)[1]
 		a=[]	
-		client = mpd.MPDClient()
-		try:
-			client.connect(common.addr, common.port)
-		except:
-			return
+		#~ client = mpd.MPDClient()
+		#~ try:
+			#~ client.connect(common.addr, common.port)
+		#~ except:
+			#~ return
 		for k in i:	
 			f= m[k][0]
 			p=m[k][1]
@@ -194,14 +196,14 @@ class DB():
 			#~ print f, p
 			if f==None:
 				if s.confirm_add(w):
-					client.add(s.clear_markup(p))
+					common.mclient.add(s.clear_markup(p))
 					#~ .replace('&amp;', '&').replace('<b>', '').replace('</b>',''))
 					#~ a.append(p.replace('&amp;', '&'))
 			else:
-				client.addid(s.clear_markup(f))
+				common.mclient.addid(s.clear_markup(f))
 				#~ .replace('&amp;', '&').replace('<b>', '').replace('</b>',''))
-		client.close()
-		client.disconnect()
+		#~ client.close()
+		#~ client.disconnect()
 		#~ print f, p
 		#~ print s, n
 		#~ s.add_to_list(None, n)
@@ -213,16 +215,16 @@ class DB():
 	def filltree(self, rd, tw):
 		#~ print tw
 		self.store.clear()
-		client = mpd.MPDClient()
-		try:
-			client.connect(common.addr, common.port)
-		except:
-			return
-		n=client.lsinfo(rd)
-		pl=client.playlistid()
+		#~ client = mpd.MPDClient()
+		#~ try:
+			#~ client.connect(common.addr, common.port)
+		#~ except:
+			#~ return
+		n=common.mclient.lsinfo(rd)
+		pl=common.mclient.playlistid()
 		#~ print pl
-		client.close()
-		client.disconnect()
+		#~ client.close()
+		#~ client.disconnect()
 		dd1=None
 		self.prev=rd
 		#~ print self.prev
@@ -307,25 +309,29 @@ class DB():
 			#~ print pp
 			self.filltree(pp, a)
 		else:
-			client = mpd.MPDClient()
-			try:
-				client.connect(common.addr, common.port)
-			except:
-				return
+			#~ client = mpd.MPDClient()
+			#~ try:
+				#~ client.connect(common.addr, common.port)
+			#~ except:
+				#~ return
 			#~ print f	
-			g=client.addid(self.clear_markup(f))
+			g=common.mclient.addid(self.clear_markup(f))
 			#~ .replace('&amp;', '&'))
 			#~ client.playid(g)
 			#~ print g
-			client.close()
-			client.disconnect()
+			#~ client.close()
+			#~ client.disconnect()
 			
 	def clear_markup(s, l):
 		return l.replace('&amp;', '&').replace('<b>','').replace('</b>','')
+		
+	def quit(s, w, e):
+		common.mdisconnect()
+		gtk.main_quit()
 			
 if __name__=="__main__":
 	gettext.bindtextdomain(common.APP_IND+'.mo', common.DIR)
 	gettext.textdomain(common.APP_IND)
 	p=DB()
-	p.window.connect("delete_event", lambda w,e: gtk.main_quit())
+	p.window.connect("delete_event", p.quit )
 	gtk.main()

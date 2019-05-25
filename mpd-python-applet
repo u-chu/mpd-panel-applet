@@ -6,12 +6,12 @@
 import gi
 gi.require_version("Gtk", "2.0")
 #~ import pygtk, gtk, gobject
-from gi.repository import Gtk as gtk
+from gi.repository import Gtk as gtk, Gdk as gdk
 from gi.repository import MatePanelApplet
 from gi.repository import GdkPixbuf
 from gi.repository import GObject as gobject
 from gi.repository import Notify as pynotify
-import mpd
+#~ import mpd
 import time, os
 from gettext import gettext as _
 import gettext
@@ -27,37 +27,64 @@ eb1=gtk.EventBox()
 eb2=gtk.EventBox()
 eb4=gtk.EventBox()
 pb5=gtk.EventBox()
+pynotify.init(common.APP_IND)
+notif=pynotify.Notification()
+
 #~ from gi.repository import Notify
 
 #~ import pygtk, sys, mateapplet, gtk, subprocess
 #~ cl=gtk.Label("00:00:00  ")
 #~ al=gtk.Label('  00:00:00  ')
 
+def info_event(icon, event):
+	if not common.conn:
+		return
+	cvol=int(common.mclient.status()['volume'])
+	if event.direction==gdk.ScrollDirection.UP and cvol<100:
+		common.mclient.setvol(cvol+5)				
+	elif event.direction==gdk.ScrollDirection.DOWN and cvol>0:
+		common.mclient.setvol(cvol-5)
+	cvol=common.mclient.status()['volume']
+	notif.update('MPD', 'Volume: %s'%(cvol), icon=gtk.STOCK_MEDIA_PLAY)
+	notif.show()
+
 def lb_click(w, e):
 	if e.button==1:
-		client = mpd.MPDClient()
-		try:
-			client.connect(common.addr, common.port)
-		except:
-			return
-		n=client.status()		
+		n=common.mclient.status()		
 		pbs=lb.allocation
 		t=e.x/pbs.width*float(n['duration'])
-		#~ print t, n
-		client.seekcur(t)
-		client.close()
-		client.disconnect()
-		#~ print pbs, t
-	#~ print e,n
+		common.mclient.seekcur(t)
 	
+def show_info(w,e):
+	if common.conn==False or get_mpd_status()=='stop':
+		return
+	cs=common.mclient.currentsong()
+	t,p=get_mpd_pos()
+	title, album, artist, date=common.getrecords(cs)
+	title+=' ['+	time.strftime("%H:%M:%S", time.gmtime(float(p)))+']'
+	message="%s\n<i>%s</i> (%s)\n<b><i>%s</i></b>"%(artist,album, date, get_mpd_status())
+	icon=gtk.STOCK_MEDIA_PLAY
+	if os.path.exists(common.cdir+'/mpd.jpg'):
+		icon=common.cdir+'mpd.jpg'
+	notif.update(title, message, icon)
+	notif.show()
+	
+def hide_info(w,e):
+	notif.close()
+
 lb=gtk.ProgressBar()
+print eb1.connect('scroll-event', info_event)
+eb2.connect('scroll-event', info_event)
+eb3.connect('scroll-event', info_event)
+eb4.connect('scroll-event', info_event)
+pb5.connect('scroll-event', info_event)
 pb5.add(lb)
 pb5.connect('button_press_event', lb_click)
+pb5.connect('enter-notify-event', show_info)
+pb5.connect('leave-notify-event', hide_info)
 #~ lb.connect("clicked", lb_click)
 lb.set_text("00:00:00/00:00:00")
 lb.set_size_request(150,2)
-pynotify.init(common.APP_IND)
-notif=pynotify.Notification()
 gettext.bindtextdomain(common.APP_IND+'.mo', common.DIR)
 gettext.textdomain(common.APP_IND)
 
@@ -69,32 +96,16 @@ cur_stat=''
 old_stat=''
 
 def get_mpd_status():
-	client = mpd.MPDClient()
-	try:
-	#if not isConnected(self):
-		client.connect(common.addr, common.port)
-	except:
-		#~ print 3
-		return ""
-	s=client.status()['state']
-	client.disconnect
-	client.close()
-	#~ print s
-	return s
+	if common.conn==False:
+		return ''
+	else:
+		return common.mclient.status()['state']
 	
 def get_mpd_current():
-	client = mpd.MPDClient()
-	try:
-	#if not isConnected(self):
-		client.connect(common.addr, common.port)
-	except:
-		#~ print 3
-		return ""
-	s=client.currentsong()
-	client.disconnect
-	client.close()
-	#~ print s
-	return s	
+	if common.conn==False:
+		return ''
+	else:
+		return common.mclient.currentsong()
 	
 def mpd_check_status():
 	global old_s
@@ -130,7 +141,6 @@ def mpd_check_status():
 		lb.set_fraction(float(t)/float(p))
 		lb.set_text('%s/%s'%(time.strftime("%H:%M:%S", time.gmtime(float(t))), time.strftime("%H:%M:%S", time.gmtime(float(p)))))
 		cs=get_mpd_current()
-		#~ {'album': 'Hammer of Justice', 'title': 'Beginning of the End', 'track': '1', 'duration': '251.454', 'artist': 'Thor', 'pos': '78', 'last-modified': '2019-04-26T02:04:56Z', 'albumartist': 'Thor', 'file': '--current/Thor - 2019 - Hammer of Justice/01 - Beginning of the End.mp3', 'time': '251', 'date': '2019', 'genre': 'Heavy Metal', 'id': '134'}
 		cur_id=cs['id']
 		cur_s=cs['file']
 		#~ print cur_s, old_s		
@@ -155,20 +165,13 @@ gobject.timeout_add_seconds(1, mpd_check_status)
 #~ gobject.idle_add(mpd_check_status)	
 	
 def get_mpd_pos():
-	client = mpd.MPDClient()
-	try:
-	#if not isConnected(self):
-		client.connect(common.addr, common.port)
-	except:
-		#~ print 3
-		return ""
-	#~ print 	client.status()
-	p=client.status()['duration']
-	t=client.status()['elapsed']
-	client.disconnect
-	client.close()
-	#~ print s
-	return t,p
+	if common.conn==False:
+		return '',''
+	else:
+		p=common.mclient.status()['duration']
+		t=common.mclient.status()['elapsed']
+		return t,p
+	
 	
 def make_dialog(s1):
 		dialog = gtk.MessageDialog(type=gtk.MessageType.QUESTION, buttons=gtk.ButtonsType.OK_CANCEL)
@@ -190,21 +193,18 @@ def fsearchdb(e):
 	res, txt=make_dialog(_('Search in DB'))
 	if res!=gtk.ResponseType.OK:
 		return 2
-	client=mpd.MPDClient()
-	try:
-		client.connect(common.addr, common.port)
-	except:
+	if common.conn==False:
 		return 1
-	rs=client.search('any',txt)
-	plid=client.playlistid()
-	cs=client.currentsong()
+	else:
+		
+		rs=common.mclient.search('any',txt)
+		plid=common.mclient.playlistid()
+		cs=common.mclient.currentsong()
 	#~ print cs
 	if len(cs)>0:
 		cid = cs['file']
 	else:
 		cid=''
-	client.close()
-	client.disconnect()
 	if len(rs)<=0:
 		d=gtk.MessageDialog(type=gtk.MessageType.ERROR, message_format='"%s" not found'%txt, buttons=gtk.ButtonsType.CLOSE)
 		#d.connect("response", lambda *a: d.destroy())
@@ -212,33 +212,19 @@ def fsearchdb(e):
 		d.destroy()
 		return 3
 	sres.SRes(rs, plid, cid)
-	#~ self.make_search_menu(rs)
 	return 0
-	#~ print rs
-	#print Gtk.ResponseType.OK
 	
 	
 def fplaylist(e):
-	#~ print "fplaylist1"
-	client = mpd.MPDClient()
-	try:
-		client.connect(common.addr, common.port)
-	except:
-		client.close()
-		client.disconnect()
-		#~ self.play_on_left_click(self)
-		return	
-	plid=client.playlistid()
-	#print plid
+	if not common.conn:
+		return
+	plid=common.mclient.playlistid()
 	cid=''
-	cs=client.currentsong()
+	cs=common.mclient.currentsong()
 	if len(cs)>0:
-		cid = client.currentsong()['file']
-	client.close()
-	client.disconnect()
+		cid = common.mclient.currentsong()['file']
 	if len(plid)<=0:
 		return[None,0]
-	#~ print "fplaylist2"	
 	plist.PL(plid, cid)
 	return 0
 	
@@ -283,7 +269,7 @@ def applet_fill(applet):
 	#~ s=get_mpd_status()
 
 	#~ hb.pack_start(cl, False, False, 0)
-	hb.pack_start(pb5, False, False, 0)
+	hb.pack_start(pb5, False, False, 2)
 	#~ hb.pack_start(al, False, False, 0)
 	hb.pack_start(gtk.Label('  '), False, False, 0)
 	hb.pack_start(eb3, False, False, 0)
@@ -339,94 +325,53 @@ def fdb(e):
 	allbase.DB()
 	
 def fpause (s, e):
-	client = mpd.MPDClient()
-	try:
-		client.connect(common.addr, common.port)
-	except:
-		client.close()
-		client.disconnect()
-		#~ self.play_on_left_click(self)
-		return	
-	status=client.status()['state']
+	if not common.conn:
+		return common.not_connected
+	status=common.mclient.status()['state']
 	if status=='pause':
-		client.play()
-		#~ self.ind.set_from_stock(gtk.STOCK_MEDIA_PLAY)
+		common.mclient.play()
 	elif status=='play':
-		client.pause()
-		#~ self.ind.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
-		#~ exit_item.set_image(gtk.STOCK_QUIT,22))
-	client.close()
-	client.disconnect()
+		common.mclient.pause()
 	
 def fplay1(e):
 	fplay(None, e)
 	
 def fplay (s, e):
-	client = mpd.MPDClient()
-	try:
-		client.connect(common.addr, common.port)
-	except:
-		client.close()
-		client.disconnect()
-		#~ self.play_on_left_click(self)
-		return	
-	status=client.status()['state']
+	if not common.conn:
+		return common.not_connected
+	status=common.mclient.status()['state']
 	if status=='pause' or status=='stop':
-		client.play()
-		#~ self.ind.set_from_stock(gtk.STOCK_MEDIA_PLAY)
+		common.mclient.play()
 	elif status=='play':
-		client.pause()
-		#~ self.ind.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
-		#~ exit_item.set_image(gtk.STOCK_QUIT,22))
-	client.close()
-	client.disconnect()
+		common.mclient.pause()
 	
 def fnext1(n):
 	fnext(None, n)
 	
 def fnext(s, n):
-	client = mpd.MPDClient()
-	try:
-		client.connect(common.addr, common.port)
-	except:
-		return
-	if client.status()['state']=='stop':
-		client.close()
-		client.disconnect()
-		return
-	client.next()
-	client.close()
-	client.disconnect()
+	if not common.conn:
+		return common.not_connected
+	if common.mclient.status()['state']=='stop':
+		return common.player_stopped
+	common.mclient.next()
 	
 def fprev1(n):
 	fprev(None, n)	
 	
 def fprev(s, n):
-	client = mpd.MPDClient()
-	try:
-		client.connect(common.addr, common.port)
-	except:
-		return
-	if client.status()['state']=='stop':
-		client.close()
-		client.disconnect()
-		return
-	client.previous()
-	client.close()
-	client.disconnect()
+	if not common.conn:
+		return common.not_connected
+	if common.mclient.status()['state']=='stop':
+		return common.player_stopped
+	common.mclient.previous()
 	
 def fstop1(n):
 	fstop(None, n)
 	
 def fstop(s, n):
-	client = mpd.MPDClient()
-	try:
-		client.connect(common.addr, common.port)
-		client.stop()
-		client.close()
-		client.disconnect()	
-	except:
-		pass
+	if not common.conn:
+		return common.not_connected
+	common.mclient.stop()
 		
 def factory(applet, iid, data):
 	#~ if iid != "MpdPythonAppletFactory":

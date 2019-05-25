@@ -2,7 +2,10 @@
 #!/usr/bin/env python
 #
 
-import os
+import os, mpd
+
+not_connected=255
+player_stopped=254
 
 cc="#0000FF"
 cp="#FF0000"
@@ -11,6 +14,12 @@ APP_IND='MpdPythonAppletFactory'
 DIR="locale"
 addr='localhost'
 port=6600
+mclient=mpd.MPDClient()
+conn=True
+try:
+	mclient.connect(addr, port)
+except:
+	conn=False
 
 def getrecords(i):
 	try:
@@ -37,3 +46,7 @@ def getrecords(i):
 		if i.find('&')>0:
 			lst[lst.index(i)]=i.replace('&', '&amp;')
 	return lst
+	
+def mdisconnect():
+	mclient.close()
+	mclient.disconnect()

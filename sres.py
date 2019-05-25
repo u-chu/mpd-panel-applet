@@ -22,8 +22,9 @@ class SRes():
 		sw2=gtk.ScrolledWindow()
 		sw2.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.ALWAYS)
 		store=gtk.ListStore(object, str,str,str,str, str)
-		print cid
+		#~ print cid
 		pimg=None
+		tt=0
 		for i in rs:
 			title, album, artist, date=common.getrecords(i)
 			f=i['file']
@@ -109,29 +110,33 @@ class SRes():
 		text = model[row][0]['file']
 		for i in range(1,5):
 			model[row][i]='<b><span foreground=\"%s\">%s</span></b>'%(common.cc, model[row][i])
-		client = mpd.MPDClient()
-		try:
-			client.connect(common.addr, common.port)
-		except:
-			return
-		client.add(text)
-		client.close()
-		client.disconnect()
+		#~ client = mpd.MPDClient()
+		#~ try:
+			#~ client.connect(common.addr, common.port)
+		#~ except:
+			#~ return
+		common.mclient.add(text)
+		#~ client.close()
+		#~ client.disconnect()
+		
+	def quit(s,w,e):
+		common.mdisconnect()
+		gtk.main_quit()
 
 if __name__=="__main__":
 	gettext.bindtextdomain(common.APP_IND+'.mo', common.DIR)
 	gettext.textdomain(common.APP_IND)
-	client = mpd.MPDClient()
-	client.connect(common.addr, common.port)
-	rs=client.search('any','андем')
-	plid=client.playlistid()
-	cs=client.currentsong()
-	client.close()
-	client.disconnect()
+	#~ client = mpd.MPDClient()
+	#~ client.connect(common.addr, common.port)
+	rs=common.mclient.search('any','андем')
+	plid=common.mclient.playlistid()
+	cs=common.mclient.currentsong()
+	#~ client.close()
+	#~ client.disconnect()
 	#~ print cs
 	cid=''
 	if len(cs)>0:
 		cid = cs['file']
 	p=SRes(rs, plid, cid)
-	p.window.connect("delete_event", lambda w,e: gtk.main_quit())	
+	p.window.connect("delete_event", p.quit)	
 	gtk.main()

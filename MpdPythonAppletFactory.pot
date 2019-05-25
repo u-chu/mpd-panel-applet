@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-05-10 20:23+0500\n"
+"POT-Creation-Date: 2019-05-23 22:40+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,74 +17,108 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: mpd-python-applet:62 mpd-python-applet:146 mpd-python-applet:270
+#: allbase.py:28
+msgid "DB"
+msgstr ""
+
+#: allbase.py:42 plist2.py:48 plist.py:48 sres.py:54
 msgid "Title"
 msgstr ""
 
-#: mpd-python-applet:63 mpd-python-applet:149 mpd-python-applet:272
+#: allbase.py:46 plist2.py:54 plist.py:54 sres.py:56
 msgid "Artist"
 msgstr ""
 
-#: mpd-python-applet:64 mpd-python-applet:148 mpd-python-applet:271
+#: allbase.py:49 plist2.py:53 plist.py:53 sres.py:55
 msgid "Album"
 msgstr ""
 
-#: mpd-python-applet:65
-msgid "Year"
-msgstr ""
-
-#: mpd-python-applet:66
-msgid "Duration"
-msgstr ""
-
-#: mpd-python-applet:147
-msgid "Time"
-msgstr ""
-
-#: mpd-python-applet:150 mpd-python-applet:273
+#: allbase.py:53 plist2.py:55 plist.py:55 sres.py:57
 msgid "Date"
 msgstr ""
 
-#: mpd-python-applet:274
-msgid "Path"
+#: allbase.py:57 plist2.py:52 plist.py:52
+msgid "Duration"
 msgstr ""
 
-#: mpd-python-applet:435
-msgid "Searching for:"
+#: allbase.py:71
+msgid "Update selected"
 msgstr ""
 
-#: mpd-python-applet:448 mpd-python-applet:562
-msgid "Search in DB"
+#: allbase.py:72 plist2.py:68 plist.py:68
+msgid "Add to list"
 msgstr ""
 
-#: mpd-python-applet:556
-msgid "Previous"
+#: allbase.py:167
+msgid "Confirm add"
 msgstr ""
 
-#: mpd-python-applet:557
-msgid "Pause"
+#: allbase.py:168
+#, python-format
+msgid "Do you want add <b>%s</b> to play list?"
 msgstr ""
 
-#: mpd-python-applet:558
-msgid "Stop"
-msgstr ""
-
-#: mpd-python-applet:559
-msgid "Play"
-msgstr ""
-
-#: mpd-python-applet:560
-msgid "Next"
-msgstr ""
-
-#: mpd-python-applet:561
+#: applet_settings.py:38
 msgid "Settings"
 msgstr ""
 
-#: mpd-python-applet:563
+#. ~ table.set_row_spacing
+#. ~ box.add(table)
+#: applet_settings.py:51
+msgid "Show progressbar"
+msgstr ""
+
+#. ~ table.attach(self.check1, 0,1 , 0, 1)
+#: applet_settings.py:54
+msgid "Show text of duration in progressbar"
+msgstr ""
+
+#. ~ table.attach(self.check2, 0, 1, 1, 2)
+#: applet_settings.py:57
+msgid "Show text of current position in progressbar"
+msgstr ""
+
+#. ~ table.attach(self.check3, 0, 1, 2, 3)
+#: applet_settings.py:60
+msgid "Show text of current position in label"
+msgstr ""
+
+#. ~ table.attach(self.check3, 0, 1, 3, 4)
+#: applet_settings.py:63
+msgid "Show text of duration in label"
+msgstr ""
+
+#. ~ hex(common.cc))
+#. ~ _("Color for corrent playing song"))
+#. ~ table.attach(self.check7, 0, 1, 6, 7)
+#: applet_settings.py:83
+msgid "Choose a path to covers"
+msgstr ""
+
+#: applet_settings.py:91
+msgid "Address"
+msgstr ""
+
+#: applet_settings.py:101
+msgid "Port"
+msgstr ""
+
+#: plist2.py:32 plist.py:32
 msgid "Playlist"
 msgstr ""
 
-#: mpd-python-applet:564
-msgid "DB"
+#: plist2.py:67 plist.py:67
+msgid "Play"
+msgstr ""
+
+#: sres.py:18
+msgid "Search results"
+msgstr ""
+
+#: sres.py:58
+msgid "Path"
+msgstr ""
+
+#: sres.py:60
+msgid "Add item(s)"
 msgstr ""
