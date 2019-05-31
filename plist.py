@@ -59,28 +59,38 @@ class PL():
 		self.treeView.connect("row-activated", self.on_activated)
 		self.treeView.get_selection().set_mode(gtk.SelectionMode.MULTIPLE)
 
-		self.treeView.connect("drag_data_get", self.drag_data_get_data)
-		self.treeView.connect("drag_data_received", self.drag_data_received_data)
+		#~ self.treeView.connect("drag_data_get", self.drag_data_get_data)
+		#~ self.treeView.connect("drag_data_received", self.drag_data_received_data)
 		acts=[
 		('play_item', gtk.STOCK_MEDIA_PLAY, _('Play'), None, None, self.play_item),
-		('remove_item', gtk.STOCK_REMOVE, _('Add to list'), None, None, self.remove_item),
+		('remove_item', gtk.STOCK_REMOVE, _('Add to list'), None, None, self.remove_item),		
+		('r_down', gtk.STOCK_GO_DOWN, _('Move item(s) down'), None, None, self.r_down),
+		('r_up', gtk.STOCK_GO_UP, _('Move item(s) up'), None, None, self.r_up),
 		]
 		xmlmenus="""
 		<ui>
 			<toolbar name='maintb'>
 				<toolitem action='play_item' />
 				<toolitem action='remove_item' />
+				<toolitem action='r_down' />
+				<toolitem action='r_up' />
 			</toolbar>
 			<accelerator action='r_up' />
 			<accelerator action='r_down' />
 			<accelerator action='remove_item' />
+			<accelerator action='play_item' />
 		</ui>
 		"""
 		self.ag=gtk.ActionGroup.new("pl_ag")
 		
 		self.ag.add_actions(acts, None)
-		self.ag.list_actions()[0].set_sensitive(False)	
+		for i in self.ag.list_actions():
+			print i.get_name()
+		#~ print self.ag.list_actions()[0].get_name()
+		self.ag.list_actions()[0].set_sensitive(False)
 		self.ag.list_actions()[1].set_sensitive(False)
+		self.ag.list_actions()[2].set_sensitive(False)
+		self.ag.list_actions()[3].set_sensitive(False)
 		UIManager=gtk.UIManager()
 		self.window.add_accel_group(UIManager.get_accel_group())
 		UIManager.insert_action_group(self.ag,0)
@@ -103,50 +113,50 @@ class PL():
 		self.treeView.enable_model_drag_dest(
 			self.TARGETS,gdk.DragAction.MOVE|
 			gdk.DragAction.DEFAULT)"""
+			
+	def r_up(s, e):
+		pass
+		
+	def r_down(s, e):
+		pass
 		
 	def remove_item(s, e):
 		print e
 		m,i=s.treeView.get_selection().get_selected_rows()
 		b=[]
 		d=[]
-		#~ f=m[i[0]][0]
-			#~ print f
 		for k in i:
-			#~ print k.prepend_index
-			#~ print m.get_path(k)
 			iter=m.get_iter(k)
 			print iter
 			k=int(k.to_string())
-			#~ print k, i[k]
-			#~ print m[k][2], k
 			f= int(m[k][0])
-			#~ p= m[k][1]
 			b.append(f)
 			d.append(iter)
-			#~ d.append(p)
-		#~ except: 
-			#~ f=None
 		b.reverse()	
 		d.reverse()
 		for t in d:
 			m.remove(t)
-		#~ client = mpd.MPDClient()
-		#~ try:
-			#~ client.connect(common.addr, common.port)
-		#~ except:
-			#~ return	
 		for a in b:
 			common.mclient.deleteid(int(a))
-		#~ client.close()
-		#~ client.disconnect()
-		#~ print b
-		#~ pass
 		
-		
-	def on_changed_selection(s, e):
-		(m,i)=s.treeView.get_selection().get_selected()
-		s.ag.list_actions()[0].set_sensitive(m==None and i==None)	
-		s.ag.list_actions()[1].set_sensitive(m==None and i==None)
+	def on_changed_selection(s, e, w=None, r=None, c=None):
+		(m,i)=s.treeView.get_selection().get_selected_rows()
+		#~ print m,i, w,r,c
+		#~ for k in i:
+			#~ print k
+		k=i[0]	
+		print i[len(i)-1], len(s.store)-1
+		#~ print i[0]	
+		s.ag.list_actions()[0].set_sensitive(i[0]!=None)	
+		a=gtk.TreePath(i[len(i)-1])
+		b=gtk.TreePath(len(s.store)-1)
+		print a,b
+		if a<b:
+			s.ag.list_actions()[1].set_sensitive(True)
+		else: 
+			s.ag.list_actions()[1].set_sensitive(False)
+		s.ag.list_actions()[2].set_sensitive(k>0)
+		s.ag.list_actions()[3].set_sensitive(i[len[i]]!=None)
 		
 	def reloadpl(self, rs, cid):		
 		#~ print cid
@@ -179,36 +189,22 @@ class PL():
 			self.store.append([i['id'], title, time1, album, artist, date])
 		ctime=time.strftime(_("Play time: %H:%M:%S"), time.gmtime(float(ctime)))
 		self.sb.push(0,ctime)
+		#~ print len(self.store)
 		
 		#~ self.pbar.set_text(time.strftime("%H:%M:%S", time.gmtime(ctime)))
 		
 		
 	def cstatus(self):
-		#~ print 10
-		#~ client = mpd.MPDClient()
-		#~ try:
-			#~ client.connect(common.addr, common.port)
-		#~ except:
-			#~ return	
-		#~ print 11
 		llist=common.mclient.playlistid()
 		cs=common.mclient.currentsong()
-		#~ print 12
 		cid=''
 		if len(cs)>0:
 			cid = common.mclient.currentsong()['file']
-		#~ print 13
-		#~ client.close()
-		#~ client.disconnect()	
 		if 	self.slist!=llist:
-			#~ print 1
 			self.reloadpl(llist, cid)
-		#~ print 2
 		return True
 		
 	def play_item(s, e, w=None, r=None, c=None):
-		#~ self.on_activated(s, s.treeView, 
-		#~ print e
 		if w!=None:
 			m=w.get_model()
 			f=m[r][0]
@@ -217,42 +213,10 @@ class PL():
 			#~ print m
 			f=m[i[0]][0]
 			print f			
-			#~ f=m[i][0]
-		#~ client = mpd.MPDClient()	
-		#~ try:
-			#~ client.connect(common.addr, common.port)
-		#~ except:
-			#~ return
 		common.mclient.playid(f)
-		#~ client.close()
-		#~ client.disconnect()		
 		
 	def on_activated(self, widget, row, col):
 		self.play_item(None, widget, row, col)
-		
-	def drag_data_get_data(self, treeview, context, selection, target_id,  etime):
-		treeselection = treeview.get_selection()
-		model, iter = treeselection.get_selected()
-		data = model.get_value(iter, 0)
-		selection.set(selection.target, 8, data)
-
-	def drag_data_received_data(self, treeview, context, x, y, selection,       info, etime):
-		model = treeview.get_model()
-		data = selection.data
-		drop_info = treeview.get_dest_row_at_pos(x, y)
-		if drop_info:
-			path, position = drop_info
-			iter = model.get_iter(path)
-			if (position == gtk.TREE_VIEW_DROP_BEFORE
-				or position == gtk.TREE_VIEW_DROP_INTO_OR_BEFORE):
-				model.insert_before(iter, [data])
-			else:
-				model.insert_after(iter, [data])
-		else:
-			model.append([data])
-		if context.action == gtk.gdk.ACTION_MOVE:
-			context.finish(True, True, etime)
-		return	
 		
 	def clear_markup(s, l):
 		return l.replace('&amp;', '&').replace('<b>','').replace('</b>','') 
@@ -262,27 +226,14 @@ class PL():
 		gtk.main_quit()
 		
 if __name__=="__main__":
-	#~ print 
-	#~ a=gtk.TargetEntry()
-	#~ b=gtk.TargetEntry.new()
 	gettext.bindtextdomain(common.APP_IND+'.mo', common.DIR)
 	gettext.textdomain(common.APP_IND)
-	#~ client = mpd.MPDClient()
-	#~ print client
-	#~ client.connect(common.addr, common.port)
 	cid=''
 	cs=common.mclient.currentsong()
-	#~ print cs
 	if len(cs)>0:
 		cid = common.mclient.currentsong()['file']
 	plid=common.mclient.playlistid()
-	#print plid
-	
-	#~ client.close()
-	#~ client.disconnect()
 	p=PL(plid, cid)
 	p.window.connect("delete_event", p.quit )	
-	#~ self.play_on_left_click(self)
-	#~ return	
 	
 	gtk.main()		

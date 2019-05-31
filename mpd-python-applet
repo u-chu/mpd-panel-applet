@@ -21,14 +21,153 @@ import applet_settings
 
 #~ import a
 
-eb5=gtk.EventBox()
-eb3=gtk.EventBox()
-eb1=gtk.EventBox()
-eb2=gtk.EventBox()
-eb4=gtk.EventBox()
-pb5=gtk.EventBox()
+eb5=gtk.EventBox() #pause
+eb3=gtk.EventBox() #prev
+eb1=gtk.EventBox() #play
+eb2=gtk.EventBox() #next
+eb4=gtk.EventBox() #stop
+pb5=gtk.EventBox() #
+
 pynotify.init(common.APP_IND)
 notif=pynotify.Notification()
+#~ first_time=True
+
+def fpause (s, e):
+	if not common.conn:
+		return common.not_connected
+	status=common.mclient.status()['state']
+	if status=='pause':
+		common.mclient.play()
+		eb1.hide()
+		eb5.show()
+	elif status=='play':
+		common.mclient.pause()
+		eb1.show()
+		eb5.hide()
+	
+def fplay1(e):
+	fplay(None, e)
+	
+def fplay (s, e):
+	if not common.conn:
+		return common.not_connected
+	status=common.mclient.status()['state']
+	if status=='pause' or status=='stop':
+		common.mclient.play()
+		eb5.show()
+		eb1.hide()
+		eb3.show()
+		eb2.show()
+		eb4.show()
+	elif status=='play':
+		common.mclient.pause()
+		eb5.hide()
+		eb1.show()
+	
+def fnext1(n):
+	fnext(None, n)
+	
+def fnext(s, n):
+	if not common.conn:
+		return common.not_connected
+	if common.mclient.status()['state']=='stop':
+		return common.player_stopped
+	common.mclient.next()
+	
+def fprev1(n):
+	fprev(None, n)	
+	
+def fprev(s, n):
+	if not common.conn:
+		return common.not_connected
+	if common.mclient.status()['state']=='stop':
+		return common.player_stopped
+	common.mclient.previous()
+	
+def fstop1(n):
+	fstop(None, n)
+	
+def fstop(s, n):
+	if not common.conn:
+		return common.not_connected
+	common.mclient.stop()
+	eb1.show()
+	eb2.hide()
+	eb3.hide()
+	eb4.hide()
+	eb5.hide()
+	
+def fsettings(e):
+	pass
+	
+	
+def fsearchdb(e):
+	res, txt=make_dialog(_('Search in DB'))
+	if res!=gtk.ResponseType.OK:
+		return 2
+	if common.conn==False:
+		return 1
+	else:
+		
+		rs=common.mclient.search('any',txt)
+		plid=common.mclient.playlistid()
+		cs=common.mclient.currentsong()
+	#~ print cs
+	if len(cs)>0:
+		cid = cs['file']
+	else:
+		cid=''
+	if len(rs)<=0:
+		d=gtk.MessageDialog(type=gtk.MessageType.ERROR, message_format='"%s" not found'%txt, buttons=gtk.ButtonsType.CLOSE)
+		#d.connect("response", lambda *a: d.destroy())
+		d.run()
+		d.destroy()
+		return 3
+	sres.SRes(rs, plid, cid)
+	return 0
+	
+	
+def fplaylist(e):
+	if not common.conn:
+		return
+	plid=common.mclient.playlistid()
+	cid=''
+	cs=common.mclient.currentsong()
+	if len(cs)>0:
+		cid = common.mclient.currentsong()['file']
+	if len(plid)<=0:
+		return[None,0]
+	plist.PL(plid, cid)
+	return 0
+		
+def fdb(e):
+	allbase.DB()
+
+acts=[
+	("fprev1", gtk.STOCK_MEDIA_PREVIOUS, _("Previous"), None, None, fprev1),
+	("fpause", gtk.STOCK_MEDIA_PAUSE, _("Pause"), None, None, fpause),
+	("fstop1", gtk.STOCK_MEDIA_STOP,_("Stop"), None, None, fstop1),
+	("fplay1", gtk.STOCK_MEDIA_PLAY,_("Play"), None, None, fstop1),
+	("fnext1", gtk.STOCK_MEDIA_NEXT,_("Next") , None, None, fplay),
+	("fsettings", gtk.STOCK_PROPERTIES, _("Settings"), None, None, fsettings),
+	("fsearchdb", gtk.STOCK_FIND, _("Search in DB"), None, None, fsearchdb),
+	('fplaylist', None, _('Playlist'), None, None, fplaylist),
+	('fdb', None, _('DB'), None, None, fdb),
+	]
+propxml="""
+			<menuitem name="fprev1" action="fprev1" />			
+			<menuitem name="fstop1" action="fstop1" />
+			<menuitem name="fpause" action="fpause" />
+			<menuitem name="fplay1" action="fplay1" />
+			<menuitem name="fnext1" action="fnext1" />
+			<separator />
+			<menuitem name="fplaylist" action="fplaylist" />
+			<menuitem name="fdb" action="fdb" />
+			
+			<menuitem name="fsearchdb" action="fsearchdb"/>
+			<separator />
+			<menuitem name="fsettings" action="fsettings" />
+			"""
 
 #~ from gi.repository import Notify
 
@@ -70,7 +209,11 @@ def show_info(w,e):
 	notif.show()
 	
 def hide_info(w,e):
-	notif.close()
+	#~ print dir(notif)
+	#~ print notif.get_server_info()
+	try:
+		notif.close()
+	except: pass
 
 lb=gtk.ProgressBar()
 print eb1.connect('scroll-event', info_event)
@@ -83,10 +226,12 @@ pb5.connect('button_press_event', lb_click)
 pb5.connect('enter-notify-event', show_info)
 pb5.connect('leave-notify-event', hide_info)
 #~ lb.connect("clicked", lb_click)
-lb.set_text("00:00:00/00:00:00")
+lb.set_text("--:--/--:--")
 lb.set_size_request(150,2)
 gettext.bindtextdomain(common.APP_IND+'.mo', common.DIR)
 gettext.textdomain(common.APP_IND)
+ag=gtk.ActionGroup.new("mpd_ag")
+ag.add_actions(acts, None)
 
 old_s=''
 old_id=''
@@ -111,35 +256,20 @@ def mpd_check_status():
 	global old_s
 	global cur_s
 	global old_stat
-	#~ global eb5
-	#~ global eb1
-	#~ global eb4
+	global first_time
 	s=get_mpd_status()
-	#~ if s=='pause':
-	
-	"""if s=='pause':
-		eb5.hide()
-		eb1.show()
-		eb2.show()
-		eb3.show()
-	elif s=='stop':
-		eb4.hide()
-		eb5.hide()
-		eb1.show()
-		eb2.hide()
-		eb3.hide()
-	elif s=='play':
-		eb1.hide()
-		eb4.show()
-		eb2.show()
-		eb3.show()
-		eb5.show()"""
-			
 	if s=='pause' or s=='play':
 		t,p=get_mpd_pos()
 		#~ print t,p
 		lb.set_fraction(float(t)/float(p))
-		lb.set_text('%s/%s'%(time.strftime("%H:%M:%S", time.gmtime(float(t))), time.strftime("%H:%M:%S", time.gmtime(float(p)))))
+		p=float(p)
+		#~ print p
+		if p>3600*24:
+			lb.set_text('%s/%s'%(time.strftime("%d:%H:%M:%S", time.gmtime(float(t))), time.strftime("%d:%H:%M:%S", time.gmtime(p))))
+		elif float(p)>3600:
+			lb.set_text('%s/%s'%(time.strftime("%H:%M:%S", time.gmtime(float(t))), time.strftime("%H:%M:%S", time.gmtime(p))))
+		else:
+			lb.set_text('%s/%s'%(time.strftime("%M:%S", time.gmtime(float(t))), time.strftime("%M:%S", time.gmtime(p))))
 		cs=get_mpd_current()
 		cur_id=cs['id']
 		cur_s=cs['file']
@@ -157,7 +287,7 @@ def mpd_check_status():
 			old_stat=s
 	else:
 			lb.set_fraction(0)
-			lb.set_text("00:00:00/00:00:00")
+			lb.set_text("--:--/--:--")
 	#~ print 'mpd_check_status'
 	return True
 	
@@ -188,46 +318,27 @@ def make_dialog(s1):
 		txt=entry.get_text().encode('utf-8')
 		dialog.destroy()
 		return [res, txt]
-	
-def fsearchdb(e):
-	res, txt=make_dialog(_('Search in DB'))
-	if res!=gtk.ResponseType.OK:
-		return 2
-	if common.conn==False:
-		return 1
-	else:
-		
-		rs=common.mclient.search('any',txt)
-		plid=common.mclient.playlistid()
-		cs=common.mclient.currentsong()
-	#~ print cs
-	if len(cs)>0:
-		cid = cs['file']
-	else:
-		cid=''
-	if len(rs)<=0:
-		d=gtk.MessageDialog(type=gtk.MessageType.ERROR, message_format='"%s" not found'%txt, buttons=gtk.ButtonsType.CLOSE)
-		#d.connect("response", lambda *a: d.destroy())
-		d.run()
-		d.destroy()
-		return 3
-	sres.SRes(rs, plid, cid)
-	return 0
-	
-	
-def fplaylist(e):
-	if not common.conn:
-		return
-	plid=common.mclient.playlistid()
-	cid=''
-	cs=common.mclient.currentsong()
-	if len(cs)>0:
-		cid = common.mclient.currentsong()['file']
-	if len(plid)<=0:
-		return[None,0]
-	plist.PL(plid, cid)
-	return 0
-	
+
+def ftime_check(s):
+	global eb5, eb1,eb4, eb2,eb3
+	if s=='pause':
+		eb5.hide()
+		eb1.show()
+		eb4.show()
+		eb2.show()
+		eb3.show()
+	elif s=='play':
+		eb5.show()
+		eb1.hide()
+		eb4.show()
+		eb2.show()
+		eb3.show()
+	elif s== 'stop':
+		eb5.hide()
+		eb1.show()
+		eb4.hide()
+		eb2.hide()
+		eb3.hide()
 	
 def applet_fill(applet):
 	#~ global eb5
@@ -256,17 +367,6 @@ def applet_fill(applet):
 	#~ eb5=gtk.EventBox()
 	eb5.add(b5)
 	eb5.connect('button-release-event', fpause)
-	
-	#~ s=get_mpd_status()
-	#~ print s
-
-	#~ elif s=='stop':
-		#~ b4.set_visible_window(False)
-		#~ b5.set_visible_window(False)
-	#~ elif s=='play':
-		#~ b1.set_visible_window(False)
-	
-	#~ s=get_mpd_status()
 
 	#~ hb.pack_start(cl, False, False, 0)
 	hb.pack_start(pb5, False, False, 2)
@@ -280,98 +380,20 @@ def applet_fill(applet):
 	applet.add(hb)
 	
 	#~ <menuitem name="Play/Pause" action="Play/Pause" />
-	acts=[
-	("fprev1", gtk.STOCK_MEDIA_PREVIOUS, _("Previous"), None, None, fprev1),
-	("fpause", gtk.STOCK_MEDIA_PAUSE, _("Pause"), None, None, fpause),
-	("fstop1", gtk.STOCK_MEDIA_STOP,_("Stop"), None, None, fstop1),
-	("fplay1", gtk.STOCK_MEDIA_PLAY,_("Play"), None, None, fstop1),
-	("fnext1", gtk.STOCK_MEDIA_NEXT,_("Next") , None, None, fplay),
-	("fsettings", gtk.STOCK_PROPERTIES, _("Settings"), None, None, fsettings),
-	("fsearchdb", gtk.STOCK_FIND, _("Search in DB"), None, None, fsearchdb),
-	('fplaylist', None, _('Playlist'), None, None, fplaylist),
-	('fdb', None, _('DB'), None, None, fdb),
-	]
-	propxml="""
-			<menuitem name="fprev1" action="fprev1" />			
-			<menuitem name="fstop1" action="fstop1" />
-			<menuitem name="fpause" action="fpause" />
-			<menuitem name="fplay1" action="fplay1" />
-			<menuitem name="fnext1" action="fnext1" />
-			<separator />
-			<menuitem name="fplaylist" action="fplaylist" />
-			<menuitem name="fdb" action="fdb" />
-			
-			<menuitem name="fsearchdb" action="fsearchdb"/>
-			<separator />
-			<menuitem name="fsettings" action="fsettings" />
-			"""
+	
 			 #~ action="Search%20in%20DB" />
 	#~ verbs = [("About", showAboutDialog)]
 	#~ name, stock_id, label, accellerator, tooltip, callback
-	mpd_check_status()
-	
-	ag=gtk.ActionGroup.new("mpd_ag")
-	ag.add_actions(acts, None)
 	#~ verbs = [("About", ''), ('Close',''), ('Next',''),('Previous',''), ('Play',''), ('Stop', ''), ('Pause', ''), ('Settings', '')]
 	applet.setup_menu(propxml, ag)
+	#~ print s, '----------------'
+
 	applet.show_all()
+	
+	mpd_check_status()
+	ftime_check(get_mpd_status())
 	#~ _IdleObject.__init__(None)
 	#~ return True
-
-def fsettings(e):
-	pass
-	
-def fdb(e):
-	allbase.DB()
-	
-def fpause (s, e):
-	if not common.conn:
-		return common.not_connected
-	status=common.mclient.status()['state']
-	if status=='pause':
-		common.mclient.play()
-	elif status=='play':
-		common.mclient.pause()
-	
-def fplay1(e):
-	fplay(None, e)
-	
-def fplay (s, e):
-	if not common.conn:
-		return common.not_connected
-	status=common.mclient.status()['state']
-	if status=='pause' or status=='stop':
-		common.mclient.play()
-	elif status=='play':
-		common.mclient.pause()
-	
-def fnext1(n):
-	fnext(None, n)
-	
-def fnext(s, n):
-	if not common.conn:
-		return common.not_connected
-	if common.mclient.status()['state']=='stop':
-		return common.player_stopped
-	common.mclient.next()
-	
-def fprev1(n):
-	fprev(None, n)	
-	
-def fprev(s, n):
-	if not common.conn:
-		return common.not_connected
-	if common.mclient.status()['state']=='stop':
-		return common.player_stopped
-	common.mclient.previous()
-	
-def fstop1(n):
-	fstop(None, n)
-	
-def fstop(s, n):
-	if not common.conn:
-		return common.not_connected
-	common.mclient.stop()
 		
 def factory(applet, iid, data):
 	#~ if iid != "MpdPythonAppletFactory":
@@ -381,10 +403,12 @@ def factory(applet, iid, data):
 	global cur_s
 	global cur_stat
 	global old_stat
+	#~ global first_time
 	old_s=''
 	cur_s=''
 	cur_stat=''
 	old_stat=''
+	#~ first_time=True
 	applet_fill(applet)
 	return True		
 	
@@ -396,3 +420,7 @@ def showAboutDialog(*arguments, **keywords):
 MatePanelApplet.Applet.factory_main("MpdPythonAppletFactory", True,
                                     MatePanelApplet.Applet.__gtype__,
                                     factory, None)
+
+
+#~ if __name__=="__main__":
+	#~ main()
