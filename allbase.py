@@ -14,7 +14,7 @@ from gi.repository import GObject as gobject, Pango as pango
 import time, os
 from gettext import gettext as _
 import gettext, json
-import common
+import common, sres
 
 #~ APP_IND='MpdPythonAppletFactory'
 #` DIR="locale"
@@ -70,6 +70,7 @@ class DB():
 		acts=[
 		('upd_sel', gtk.STOCK_REFRESH, _('Update selected'), None, None, self.fupd_sel),
 		('add_list', gtk.STOCK_ADD, _('Add to list'), None, None, self.fadd_list),
+		('fsdb', gtk.STOCK_FIND, _("Search in DB"), None, None, self.fsdb),
 		]
 
 		mainxml="""
@@ -83,18 +84,22 @@ class DB():
 				<menu action = 'File'>
 					<menuitem action='upd_sel' />
 					<menuitem action='add_list' />
+					<menuitem action='fsdb' />
 				</menu>
 			</menubar>
 			<toolbar name='TB'>
 					<toolitem action='upd_sel' />
 					<toolitem action='add_list' />
+					<toolitem action='fsdb' />
 			</toolbar>
 		</ui>
 		"""
 		self.ag=gtk.ActionGroup.new("mpd_ag")
 		self.ag.add_actions(acts, None)
-		self.ag.list_actions()[0].set_sensitive(False)
+		#~ for i in self.ag.list_actions():
+			#~ print i.get_name()
 		self.ag.list_actions()[1].set_sensitive(False)
+		self.ag.list_actions()[2].set_sensitive(False)
 		UIManager=gtk.UIManager()
 		self.window.add_accel_group(UIManager.get_accel_group())
 		UIManager.insert_action_group(self.ag,0)
@@ -105,11 +110,18 @@ class DB():
 		self.maintoolbar=UIManager.get_widget('/TB')
 		
 		#~ print self.mainmenu, self.popupmenu
-		#~ vbox.pack_start(self.mainmenu, False, False, 3)
+		#~ vbox.pack_start(self.mainmenu, False, False, 0)
 		vbox.pack_start(self.maintoolbar, False, False, 0)
 		vbox.pack_start(sw2, True, True, 0)	
 		#~ self.window.set_popup_menu(self.popupmenu)
 		self.window.show_all()
+		self.window.set_focus(self.treeView)
+		
+	def vol(s ,e): 
+		pass
+		
+	def fsdb(s, e):
+		common.fsdb()
 		
 	def on_changed_selection(s, e):
 		#~ print e
@@ -122,8 +134,8 @@ class DB():
 		except TypeError:
 			f=None
 		p=m[i[0]][1]
-		s.ag.list_actions()[0].set_sensitive(f==None)
-		s.ag.list_actions()[1].set_sensitive(m!=None and i!=None)
+		s.ag.list_actions()[1].set_sensitive(f==None)
+		s.ag.list_actions()[2].set_sensitive(m!=None and i!=None)
 		
 	def fupd_sel(s, n):
 		a=s.treeView.get_selection()

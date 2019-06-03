@@ -18,7 +18,7 @@ class SRes():
 		self.window.set_title(_('Search results'))
 		self.window.set_size_request(640, 480)
 		self.window.move(50,50)
-		vbox = gtk.VBox(False, 8)
+		vbox = gtk.VBox(False, 0)
 		sw2=gtk.ScrolledWindow()
 		sw2.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.ALWAYS)
 		store=gtk.ListStore(object, str,str,str,str, str)
