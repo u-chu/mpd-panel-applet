@@ -112,7 +112,17 @@ class DB():
 		#~ print self.mainmenu, self.popupmenu
 		#~ vbox.pack_start(self.mainmenu, False, False, 0)
 		vbox.pack_start(self.maintoolbar, False, False, 0)
-		vbox.pack_start(sw2, True, True, 0)	
+		vbox.pack_start(sw2, True, True, 0)			
+		#~ vbox.pack_start(common.sb, False, False, 0)
+		#~ ci1 = self.sb.get_context_id('0')
+		#~ print ci1
+		#~ self.sb.push(0, '21')
+		#~ ci2 = self.sb.get_context_id('1')
+		#~ print ci2
+		#~ self.sb.push(1, '33')
+		#~ self.sb.push(2, '43')
+		#~ self.sb.push(3, '53')
+		#~ self.sb.pop(ci1)
 		#~ self.window.set_popup_menu(self.popupmenu)
 		self.window.show_all()
 		self.window.set_focus(self.treeView)
@@ -134,8 +144,10 @@ class DB():
 		except TypeError:
 			f=None
 		p=m[i[0]][1]
+		#~ print p
 		s.ag.list_actions()[1].set_sensitive(f==None)
 		s.ag.list_actions()[2].set_sensitive(m!=None and i!=None)
+		#~ common.sb.push(0, s.clear_markup(p))
 		
 	def fupd_sel(s, n):
 		a=s.treeView.get_selection()
@@ -335,7 +347,7 @@ class DB():
 			#~ client.disconnect()
 			
 	def clear_markup(s, l):
-		return l.replace('&amp;', '&').replace('<b>','').replace('</b>','')
+		return l.replace('&amp;', '&').replace('<b>','').replace('</b>','').replace('<i>','').replace('</i>','')
 		
 	def quit(s, w, e):
 		common.mdisconnect()

@@ -21,6 +21,8 @@ addr='localhost'
 port=6600
 mclient=mpd.MPDClient()
 conn=True
+sb=gtk.Statusbar()
+
 try:
 	mclient.connect(addr, port)
 except:

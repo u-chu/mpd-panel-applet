@@ -36,8 +36,8 @@ class PL():
 		sw2.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.ALWAYS)
 		self.store=gtk.ListStore(object, str,str,str,str, str)
 		self.treeView = gtk.TreeView(model=self.store)
-		ts1=self.treeView.get_selection()
-		ts1.connect('changed', self.on_changed_selection)
+		#~ ts1=
+		self.treeView.get_selection().connect('changed', self.on_changed_selection)
 		#~ self.pbar = gtk.ProgressBar()
 			
 		#~ vbox.pack_start(self.pbar, False, False, 0)	
@@ -101,6 +101,9 @@ class PL():
 		self.sb=gtk.Statusbar()
 		self.sb.show_all()
 		vbox.pack_start(self.sb, False, False,0)
+		self.sb.set_has_resize_grip(False)
+		#~ self.sb.set_shadow_type(gtk.SHADOW_NONE)
+		#~ vbox.pack_start(common.sb, False, False,0)
 		self.window.show_all()
 		self.window.set_focus(self.treeView)
 		self.reloadpl(rs, cid)
@@ -114,11 +117,19 @@ class PL():
 			self.TARGETS,gdk.DragAction.MOVE|
 			gdk.DragAction.DEFAULT)"""
 			
+	def moverecs(s,e, t):
+		m,i=s.treeView.get_selection().get_selected_rows()
+		llist=common.mclient.playlistid()
+		k=int(str(i[0]))
+		idc=int(llist[k]['id'])
+		#~ print idc, k, t
+		common.mclient.moveid(idc, k+t)
+			
 	def r_up(s, e):
-		pass
+		s.moverecs(e,-1)
 		
 	def r_down(s, e):
-		pass
+		s.moverecs(e,1)
 		
 	def remove_item(s, e):
 		print e
@@ -127,7 +138,7 @@ class PL():
 		d=[]
 		for k in i:
 			iter=m.get_iter(k)
-			print iter
+			print iter, i
 			k=int(k.to_string())
 			f= int(m[k][0])
 			b.append(f)
@@ -139,25 +150,22 @@ class PL():
 		for a in b:
 			common.mclient.deleteid(int(a))
 		
-	def on_changed_selection(s, e, w=None, r=None, c=None):
-		(m,i)=s.treeView.get_selection().get_selected_rows()
-		#~ print m,i, w,r,c
-		#~ for k in i:
-			#~ print k
-		k=i[0]	
-		print i[len(i)-1], len(s.store)-1
-		#~ print i[0]	
+	def on_changed_selection(s, e, w=None, r=None, c=None):		
+		sel=s.treeView.get_selection()
+		sel.get_tree_view().grab_focus()
+		(m,i)=sel.get_selected_rows()
+		if len(i)<=0:
+			return
+		#~ print i
+		k=int(str(i[0]))	
 		s.ag.list_actions()[0].set_sensitive(i[0]!=None)	
-		a=gtk.TreePath(i[len(i)-1])
-		b=gtk.TreePath(len(s.store)-1)
-		print a,b
-		if a<b:
-			s.ag.list_actions()[1].set_sensitive(True)
-		else: 
-			s.ag.list_actions()[1].set_sensitive(False)
-		s.ag.list_actions()[2].set_sensitive(k>0)
-		s.ag.list_actions()[3].set_sensitive(i[len[i]]!=None)
-		
+		s.ag.list_actions()[3].set_sensitive(i[0]!=None)
+		s.ag.list_actions()[2].set_sensitive(i[0]!=None and k>0)
+		s.ag.list_actions()[1].set_sensitive(i[0]!=None and k<len(s.store)-1)
+		#~ print int(str(i[0]))
+		#~ p=m[i[0]][1]
+		#~ common.sb.push(0, p)
+				
 	def reloadpl(self, rs, cid):		
 		#~ print cid
 		#~ pimg=None
