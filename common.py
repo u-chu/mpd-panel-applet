@@ -23,6 +23,34 @@ mclient=mpd.MPDClient()
 conn=True
 sb=gtk.Statusbar()
 
+eb1=gtk.EventBox() #play
+eb2=gtk.EventBox() #next
+eb3=gtk.EventBox() #prev
+eb4=gtk.EventBox() #stop
+eb5=gtk.EventBox() #pause
+
+def set_buttons_visible(status):
+	print status
+	if status=='stop':
+		eb1.show() #stop
+		eb2.hide()
+		eb3.hide()
+		eb4.hide()
+		eb5.hide()
+	elif status=='pause':
+		eb5.hide()
+		eb1.show()
+		eb3.show()
+		eb2.show()
+		eb4.show()
+	elif status=='play':
+		eb5.show()
+		eb1.hide()
+		eb3.show()
+		eb2.show()
+		eb4.show()
+		
+		
 try:
 	mclient.connect(addr, port)
 except:

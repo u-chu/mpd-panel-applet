@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mpd-applet\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-05-23 22:40+0500\n"
-"PO-Revision-Date: 2019-05-23 22:46+0500\n"
+"POT-Creation-Date: 2019-06-07 23:28+0500\n"
+"PO-Revision-Date: 2019-06-07 23:29+0500\n"
 "Last-Translator:  <ghoul.mask@gmail.com>\n"
 "Language-Team: LANGUAGE <ghola>\n"
 "Language: ru\n"
@@ -20,27 +20,27 @@ msgstr ""
 "X-Generator: Poedit 1.6.10\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
-#: allbase.py:28
+#: allbase.py:28 mpd-python-applet:159
 msgid "DB"
 msgstr "База музыки"
 
-#: allbase.py:42 plist2.py:48 plist.py:48 sres.py:54
+#: allbase.py:42 plist.py:48 sres.py:55
 msgid "Title"
 msgstr "Имя"
 
-#: allbase.py:46 plist2.py:54 plist.py:54 sres.py:56
+#: allbase.py:46 plist.py:54 sres.py:57
 msgid "Artist"
 msgstr "Исполнитель"
 
-#: allbase.py:49 plist2.py:53 plist.py:53 sres.py:55
+#: allbase.py:49 plist.py:53 sres.py:56
 msgid "Album"
 msgstr "Альбом"
 
-#: allbase.py:53 plist2.py:55 plist.py:55 sres.py:57
+#: allbase.py:53 plist.py:55 sres.py:58
 msgid "Date"
 msgstr "Дата"
 
-#: allbase.py:57 plist2.py:52 plist.py:52
+#: allbase.py:57 plist.py:52
 msgid "Duration"
 msgstr "Длительность"
 
@@ -48,20 +48,24 @@ msgstr "Длительность"
 msgid "Update selected"
 msgstr "Обновить выделенное"
 
-#: allbase.py:72 plist2.py:68 plist.py:68
+#: allbase.py:72 plist.py:66
 msgid "Add to list"
 msgstr "Добавить список"
 
-#: allbase.py:167
+#: allbase.py:73 common.py:78 mpd-python-applet:157
+msgid "Search in DB"
+msgstr "Искать в музыкальной базе"
+
+#: allbase.py:193
 msgid "Confirm add"
 msgstr "Подтвердите добавление"
 
-#: allbase.py:168
+#: allbase.py:194
 #, python-format
 msgid "Do you want add <b>%s</b> to play list?"
 msgstr "Вы точно хотите добавить <b>%s</b> в плейлист?"
 
-#: applet_settings.py:38
+#: applet_settings.py:38 mpd-python-applet:156
 msgid "Settings"
 msgstr "Настройки"
 
@@ -106,46 +110,60 @@ msgstr "Адрес"
 msgid "Port"
 msgstr "Порт"
 
-#: plist2.py:32 plist.py:32
+#: common.py:65
+msgid "Searching for:"
+msgstr "Строка поиска"
+
+#: plist.py:32 mpd-python-applet:158
 msgid "Playlist"
 msgstr "Плейлист"
 
-#: plist2.py:67 plist.py:67
+#: plist.py:65 mpd-python-applet:154
 msgid "Play"
 msgstr "Играть"
+
+#: plist.py:67
+msgid "Move item(s) down"
+msgstr "Переместить вниз"
+
+#: plist.py:68
+msgid "Move item(s) up"
+msgstr "Переместить вверх"
+
+#: plist.py:198
+msgid "Play time: %H:%M:%S"
+msgstr "Общее время: %H:%M:%S"
 
 #: sres.py:18
 msgid "Search results"
 msgstr "Результаты поиска"
 
-#: sres.py:58
+#: sres.py:59
 msgid "Path"
 msgstr "Путь"
 
-#: sres.py:60
+#: sres.py:61
 msgid "Add item(s)"
 msgstr "Добавить Запись(и)"
+
+#: mpd-python-applet:151
+msgid "Previous"
+msgstr "Назад"
+
+#: mpd-python-applet:152
+msgid "Pause"
+msgstr "Пауза"
+
+#: mpd-python-applet:153
+msgid "Stop"
+msgstr "Стоп"
+
+#: mpd-python-applet:155
+msgid "Next"
+msgstr "Вперед"
 
 #~ msgid "Year"
 #~ msgstr "Дата"
 
 #~ msgid "Time"
 #~ msgstr "Длительность"
-
-#~ msgid "Searching for:"
-#~ msgstr "Строка поиска"
-
-#~ msgid "Search in DB"
-#~ msgstr "Искать в музыкальной базе"
-
-#~ msgid "Previous"
-#~ msgstr "Назад"
-
-#~ msgid "Pause"
-#~ msgstr "Пауза"
-
-#~ msgid "Stop"
-#~ msgstr "Стоп"
-
-#~ msgid "Next"
-#~ msgstr "Вперед"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-05-23 22:40+0500\n"
+"POT-Creation-Date: 2019-06-07 23:28+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,27 +17,27 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: allbase.py:28
+#: allbase.py:28 mpd-python-applet:159
 msgid "DB"
 msgstr ""
 
-#: allbase.py:42 plist2.py:48 plist.py:48 sres.py:54
+#: allbase.py:42 plist.py:48 sres.py:55
 msgid "Title"
 msgstr ""
 
-#: allbase.py:46 plist2.py:54 plist.py:54 sres.py:56
+#: allbase.py:46 plist.py:54 sres.py:57
 msgid "Artist"
 msgstr ""
 
-#: allbase.py:49 plist2.py:53 plist.py:53 sres.py:55
+#: allbase.py:49 plist.py:53 sres.py:56
 msgid "Album"
 msgstr ""
 
-#: allbase.py:53 plist2.py:55 plist.py:55 sres.py:57
+#: allbase.py:53 plist.py:55 sres.py:58
 msgid "Date"
 msgstr ""
 
-#: allbase.py:57 plist2.py:52 plist.py:52
+#: allbase.py:57 plist.py:52
 msgid "Duration"
 msgstr ""
 
@@ -45,20 +45,24 @@ msgstr ""
 msgid "Update selected"
 msgstr ""
 
-#: allbase.py:72 plist2.py:68 plist.py:68
+#: allbase.py:72 plist.py:66
 msgid "Add to list"
 msgstr ""
 
-#: allbase.py:167
+#: allbase.py:73 common.py:78 mpd-python-applet:157
+msgid "Search in DB"
+msgstr ""
+
+#: allbase.py:193
 msgid "Confirm add"
 msgstr ""
 
-#: allbase.py:168
+#: allbase.py:194
 #, python-format
 msgid "Do you want add <b>%s</b> to play list?"
 msgstr ""
 
-#: applet_settings.py:38
+#: applet_settings.py:38 mpd-python-applet:156
 msgid "Settings"
 msgstr ""
 
@@ -103,22 +107,54 @@ msgstr ""
 msgid "Port"
 msgstr ""
 
-#: plist2.py:32 plist.py:32
+#: common.py:65
+msgid "Searching for:"
+msgstr ""
+
+#: plist.py:32 mpd-python-applet:158
 msgid "Playlist"
 msgstr ""
 
-#: plist2.py:67 plist.py:67
+#: plist.py:65 mpd-python-applet:154
 msgid "Play"
+msgstr ""
+
+#: plist.py:67
+msgid "Move item(s) down"
+msgstr ""
+
+#: plist.py:68
+msgid "Move item(s) up"
+msgstr ""
+
+#: plist.py:198
+msgid "Play time: %H:%M:%S"
 msgstr ""
 
 #: sres.py:18
 msgid "Search results"
 msgstr ""
 
-#: sres.py:58
+#: sres.py:59
 msgid "Path"
 msgstr ""
 
-#: sres.py:60
+#: sres.py:61
 msgid "Add item(s)"
+msgstr ""
+
+#: mpd-python-applet:151
+msgid "Previous"
+msgstr ""
+
+#: mpd-python-applet:152
+msgid "Pause"
+msgstr ""
+
+#: mpd-python-applet:153
+msgid "Stop"
+msgstr ""
+
+#: mpd-python-applet:155
+msgid "Next"
 msgstr ""

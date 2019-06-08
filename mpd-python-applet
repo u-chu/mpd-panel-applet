@@ -21,11 +21,15 @@ import applet_settings
 
 #~ import a
 
-eb5=gtk.EventBox() #pause
-eb3=gtk.EventBox() #prev
-eb1=gtk.EventBox() #play
-eb2=gtk.EventBox() #next
-eb4=gtk.EventBox() #stop
+print gettext.install(common.APP_IND)
+gettext.bindtextdomain(gettext.find(common.APP_IND), common.DIR)
+gettext.textdomain(common.APP_IND)
+
+#~ eb5=gtk.EventBox() #pause
+#~ eb3=gtk.EventBox() #prev
+#~ eb1=gtk.EventBox() #play
+#~ eb2=gtk.EventBox() #next
+#~ eb4=gtk.EventBox() #stop
 pb5=gtk.EventBox() #
 
 pynotify.init(common.APP_IND)
@@ -38,12 +42,15 @@ def fpause (s, e):
 	status=common.mclient.status()['state']
 	if status=='pause':
 		common.mclient.play()
-		eb1.hide()
-		eb5.show()
+		common.set_buttons_visible('play')
+		#~ eb1.hide()
+		#~ eb5.show()
 	elif status=='play':
 		common.mclient.pause()
-		eb1.show()
-		eb5.hide()
+		common.set_buttons_visible('pause')
+		#~ eb1.show()
+		#~ eb5.hide()
+		
 	
 def fplay1(e):
 	fplay(None, e)
@@ -54,15 +61,18 @@ def fplay (s, e):
 	status=common.mclient.status()['state']
 	if status=='pause' or status=='stop':
 		common.mclient.play()
-		eb5.show()
-		eb1.hide()
-		eb3.show()
-		eb2.show()
-		eb4.show()
+		common.set_buttons_visible('play')
+		#~ eb5.show()
+		#~ eb1.hide()
+		#~ eb3.show()
+		#~ eb2.show()
+		#~ eb4.show()
 	elif status=='play':
 		common.mclient.pause()
-		eb5.hide()
-		eb1.show()
+		common.set_buttons_visible('pause')
+		#~ eb5.hide()
+		#~ eb1.show()
+		
 	
 def fnext1(n):
 	fnext(None, n)
@@ -91,11 +101,12 @@ def fstop(s, n):
 	if not common.conn:
 		return common.not_connected
 	common.mclient.stop()
-	eb1.show()
-	eb2.hide()
-	eb3.hide()
-	eb4.hide()
-	eb5.hide()
+	common.set_buttons_visible('stop')
+	#~ eb1.show() #stop
+	#~ eb2.hide()
+	#~ eb3.hide()
+	#~ eb4.hide()
+	#~ eb5.hide()
 	
 def fsettings(e):
 	pass
@@ -146,9 +157,9 @@ def fdb(e):
 acts=[
 	("fprev1", gtk.STOCK_MEDIA_PREVIOUS, _("Previous"), None, None, fprev1),
 	("fpause", gtk.STOCK_MEDIA_PAUSE, _("Pause"), None, None, fpause),
-	("fstop1", gtk.STOCK_MEDIA_STOP,_("Stop"), None, None, fstop1),
+	("fstop1", gtk.STOCK_MEDIA_STOP,_('Stop'), None, None, fstop1),
 	("fplay1", gtk.STOCK_MEDIA_PLAY,_("Play"), None, None, fstop1),
-	("fnext1", gtk.STOCK_MEDIA_NEXT,_("Next") , None, None, fplay),
+	("fnext1", gtk.STOCK_MEDIA_NEXT,_('Next') , None, None, fplay),
 	("fsettings", gtk.STOCK_PROPERTIES, _("Settings"), None, None, fsettings),
 	("fsearchdb", gtk.STOCK_FIND, _("Search in DB"), None, None, fsearchdb),
 	('fplaylist', None, _('Playlist'), None, None, fplaylist),
@@ -216,10 +227,10 @@ def hide_info(w,e):
 	except: pass
 
 lb=gtk.ProgressBar()
-print eb1.connect('scroll-event', info_event)
-eb2.connect('scroll-event', info_event)
-eb3.connect('scroll-event', info_event)
-eb4.connect('scroll-event', info_event)
+common.eb1.connect('scroll-event', info_event)
+common.eb2.connect('scroll-event', info_event)
+common.eb3.connect('scroll-event', info_event)
+common.eb4.connect('scroll-event', info_event)
 pb5.connect('scroll-event', info_event)
 pb5.add(lb)
 pb5.connect('button_press_event', lb_click)
@@ -303,25 +314,26 @@ def get_mpd_pos():
 		return t,p
 
 def ftime_check(s):
-	global eb5, eb1,eb4, eb2,eb3
-	if s=='pause':
-		eb5.hide()
-		eb1.show()
-		eb4.show()
-		eb2.show()
-		eb3.show()
-	elif s=='play':
-		eb5.show()
-		eb1.hide()
-		eb4.show()
-		eb2.show()
-		eb3.show()
-	elif s== 'stop':
-		eb5.hide()
-		eb1.show()
-		eb4.hide()
-		eb2.hide()
-		eb3.hide()
+	pass
+	#~ global eb5, eb1,eb4, eb2,eb3
+	#~ if s=='pause':
+		#~ eb5.hide()
+		#~ eb1.show()
+		#~ eb4.show()
+		#~ eb2.show()
+		#~ eb3.show()
+	#~ elif s=='play':
+		#~ eb5.show()
+		#~ eb1.hide()
+		#~ eb4.show()
+		#~ eb2.show()
+		#~ eb3.show()
+	#~ elif s== 'stop':
+		#~ eb5.hide()
+		#~ eb1.show()
+		#~ eb4.hide()
+		#~ eb2.hide()
+		#~ eb3.hide()
 	
 def applet_fill(applet):
 	#~ global eb5
@@ -332,34 +344,34 @@ def applet_fill(applet):
 	hb=gtk.HBox()	
 	b1=gtk.Image(stock=gtk.STOCK_MEDIA_PLAY)
 	#~ eb1= 
-	eb1.add(b1)
-	eb1.connect('button-release-event', fplay)	
+	common.eb1.add(b1)
+	common.eb1.connect('button-release-event', fplay)	
 	b2=gtk.Image(stock=gtk.STOCK_MEDIA_NEXT)
 	#~ eb2=gtk.EventBox()
-	eb2.add(b2)
-	eb2.connect('button-release-event', fnext)
+	common.eb2.add(b2)
+	common.eb2.connect('button-release-event', fnext)
 	b3=gtk.Image(stock=gtk.STOCK_MEDIA_PREVIOUS)
 	#~ eb3=gtk.EventBox()
-	eb3.add(b3)
-	eb3.connect('button-release-event', fprev)
+	common.eb3.add(b3)
+	common.eb3.connect('button-release-event', fprev)
 	b4=gtk.Image(stock=gtk.STOCK_MEDIA_STOP)
 	#~ eb4=gtk.EventBox()
-	eb4.add(b4)
-	eb4.connect('button-release-event', fstop)
+	common.eb4.add(b4)
+	common.eb4.connect('button-release-event', fstop)
 	b5=gtk.Image(stock=gtk.STOCK_MEDIA_PAUSE)
 	#~ eb5=gtk.EventBox()
-	eb5.add(b5)
-	eb5.connect('button-release-event', fpause)
+	common.eb5.add(b5)
+	common.eb5.connect('button-release-event', fpause)
 
 	#~ hb.pack_start(cl, False, False, 0)
 	hb.pack_start(pb5, False, False, 2)
 	#~ hb.pack_start(al, False, False, 0)
 	hb.pack_start(gtk.Label('  '), False, False, 0)
-	hb.pack_start(eb3, False, False, 0)
-	hb.pack_start(eb4, False, False, 0)
-	hb.pack_start(eb5, False, False, 0)
-	hb.pack_start(eb1, False, False, 0)
-	hb.pack_end(eb2, False, False, 0)
+	hb.pack_start(common.eb3, False, False, 0)
+	hb.pack_start(common.eb4, False, False, 0)
+	hb.pack_start(common.eb5, False, False, 0)
+	hb.pack_start(common.eb1, False, False, 0)
+	hb.pack_end(common.eb2, False, False, 0)
 	applet.add(hb)
 	
 	#~ <menuitem name="Play/Pause" action="Play/Pause" />
@@ -374,7 +386,10 @@ def applet_fill(applet):
 	applet.show_all()
 	
 	mpd_check_status()
-	ftime_check(get_mpd_status())
+	status=get_mpd_status()
+	print status
+	common.set_buttons_visible(status)
+	ftime_check(status)
 	#~ _IdleObject.__init__(None)
 	#~ return True
 		
