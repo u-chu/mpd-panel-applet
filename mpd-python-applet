@@ -255,7 +255,13 @@ def get_mpd_status():
 	if common.conn==False:
 		return ''
 	else:
-		return common.mclient.status()['state']
+		st=common.mclient.status()
+		if 'updating_db' in st.keys():
+			common.stlabel.set_markup('<b>U</b>')
+		else:
+			common.stlabel.set_text('  ')
+		#~ print common.mclient.status()
+		return st['state']
 	
 def get_mpd_current():
 	if common.conn==False:
@@ -366,7 +372,7 @@ def applet_fill(applet):
 	#~ hb.pack_start(cl, False, False, 0)
 	hb.pack_start(pb5, False, False, 2)
 	#~ hb.pack_start(al, False, False, 0)
-	hb.pack_start(gtk.Label('  '), False, False, 0)
+	hb.pack_start(common.stlabel, False, False, 0)
 	hb.pack_start(common.eb3, False, False, 0)
 	hb.pack_start(common.eb4, False, False, 0)
 	hb.pack_start(common.eb5, False, False, 0)

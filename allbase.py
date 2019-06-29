@@ -13,7 +13,8 @@ from gi.repository import GObject as gobject, Pango as pango
 #~ import mpd
 import time, os
 from gettext import gettext as _
-import gettext, json
+import gettext
+#~ , json
 import common, sres
 
 #~ APP_IND='MpdPythonAppletFactory'
@@ -81,11 +82,9 @@ class DB():
 				<menuitem name="fadd_list" action="add_list" />
 			</popup>
 			<menubar name='MB'>
-				<menu action = 'File'>
 					<menuitem action='upd_sel' />
 					<menuitem action='add_list' />
 					<menuitem action='fsdb' />
-				</menu>
 			</menubar>
 			<toolbar name='TB'>
 					<toolitem action='upd_sel' />
@@ -106,11 +105,11 @@ class DB():
 		#~ UIManager.add_ui_from_string(popupxml)
 		UIManager.add_ui_from_string(mainxml)
 		#~ self.popupmenu = UIManager.get_widget('/p')
-		#~ self.mainmenu=UIManager.get_widget('/MB')
+		#~ mainmenu=UIManager.get_widget('/MB')
 		self.maintoolbar=UIManager.get_widget('/TB')
-		
+		self.maintoolbar.set_icon_size(gtk.IconSize.MENU)
 		#~ print self.mainmenu, self.popupmenu
-		#~ vbox.pack_start(self.mainmenu, False, False, 0)
+		#~ vbox.pack_start(mainmenu, False, False, 0)
 		vbox.pack_start(self.maintoolbar, False, False, 0)
 		vbox.pack_start(sw2, True, True, 0)			
 		#~ vbox.pack_start(common.sb, False, False, 0)
@@ -180,7 +179,7 @@ class DB():
 			return
 		if f==None or len(b)<=0:
 			for z in d:
-				print z, common.mclient.update(s.clear_markup(z))
+				print z, common.mclient.update(common.clear_markup(z))
 				#~ .replace('&amp;', '&').replace('<b>','').replace('</b>',''))
 		#~ else:
 			#~ client.addid(f.replace('&amp;', '&'))
@@ -220,11 +219,11 @@ class DB():
 			#~ print f, p
 			if f==None:
 				if s.confirm_add(w):
-					common.mclient.add(s.clear_markup(p))
+					common.mclient.add(common.clear_markup(p))
 					#~ .replace('&amp;', '&').replace('<b>', '').replace('</b>',''))
 					#~ a.append(p.replace('&amp;', '&'))
 			else:
-				common.mclient.addid(s.clear_markup(f))
+				common.mclient.addid(common.clear_markup(f))
 				#~ .replace('&amp;', '&').replace('<b>', '').replace('</b>',''))
 		#~ client.close()
 		#~ client.disconnect()
@@ -314,7 +313,7 @@ class DB():
 		p=m[i[0]][1][0:3:]
 		#~ print p
 		if p=='<b>':
-			p = self.clear_markup(m[i[0]][1][3:])
+			p = common.clear_markup(m[i[0]][1][3:])
 			#~ .replace('</b>', '').replace('&amp;', '&')
 			#~ print p
 			if p.find('/')<=0:
@@ -328,7 +327,7 @@ class DB():
 			return
 		if f==None:
 			#~ print m[i][1], a
-			pp=self.clear_markup(m[i[0]][1])
+			pp=common.clear_markup(m[i[0]][1])
 			#~ .replace('&amp;', '&').replace('</b>', '').replace('<b>', '')
 			#~ print pp
 			self.filltree(pp, a)
@@ -339,15 +338,16 @@ class DB():
 			#~ except:
 				#~ return
 			#~ print f	
-			g=common.mclient.addid(self.clear_markup(f))
+			g=common.mclient.addid(common.clear_markup(f))
 			#~ .replace('&amp;', '&'))
 			#~ client.playid(g)
 			#~ print g
 			#~ client.close()
 			#~ client.disconnect()
 			
-	def clear_markup(s, l):
+	"""def clear_markup(s, l):
 		return l.replace('&amp;', '&').replace('<b>','').replace('</b>','').replace('<i>','').replace('</i>','')
+		"""
 		
 	def quit(s, w, e):
 		common.mdisconnect()

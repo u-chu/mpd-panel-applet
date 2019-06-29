@@ -65,6 +65,9 @@ class SRes():
 			<toolbar name='maintb'>
 				<toolitem action='add_items' />
 			</toolbar>
+			<menubar name='mainmenu'>
+				<menuitem action='add_items' />
+			</menubar>
 		</ui>
 		"""
 		self.ag=gtk.ActionGroup("pl_ag")
@@ -77,6 +80,9 @@ class SRes():
 		UIManager.insert_action_group(self.ag,0)
 		UIManager.add_ui_from_string(xmlmenus)
 		self.toolbar = UIManager.get_widget('/maintb')
+		self.toolbar.set_icon_size(gtk.IconSize.MENU)
+		#~ mainmenu=UIManager.get_widget('/mainmenu')
+		#~ vbox.pack_start(mainmenu, False, False, 0)
 		vbox.pack_start(self.toolbar, False, False, 0)
 		vbox.pack_start(sw2, True, True, 0)
 		#rend=gtk.CellRendererPixbuf()
@@ -95,29 +101,30 @@ class SRes():
 		self.window.show_all()
 		
 	def add_items(s, e):
-		print e.get_proxies()
-		pass
-		
+		#~ print s.treeView.get_selection().get_selected_rows()
+		(m,i)=s.window.get_focus().get_selection().get_selected_rows()
+		a=[]
+		b=[]
+		if not common.conn:
+			return
+		for k in i:
+			f= m[k][0]['file']
+			#~ print f
+			common.mclient.addid(common.clear_markup(f))
+			for j in range(1,5):
+				m[k][j]='<b><span foreground=\"%s\">%s</span></b>'%(common.cc, m[k][j])
+
 	def on_changed_selection(s, e):
 		#~ print e.get_proxies()
 		(m,i)=e.get_selected_rows()
 		s.ag.list_actions()[0].set_sensitive(m!=None and i!=None)	
 		
 	def on_activated(self, widget, row, col):
-		#~ print widget.get_proxies()
 		model = widget.get_model()
-		#~ print model
 		text = model[row][0]['file']
 		for i in range(1,5):
 			model[row][i]='<b><span foreground=\"%s\">%s</span></b>'%(common.cc, model[row][i])
-		#~ client = mpd.MPDClient()
-		#~ try:
-			#~ client.connect(common.addr, common.port)
-		#~ except:
-			#~ return
 		common.mclient.add(text)
-		#~ client.close()
-		#~ client.disconnect()
 		
 	def quit(s,w,e):
 		common.mdisconnect()

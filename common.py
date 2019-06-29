@@ -22,6 +22,7 @@ port=6600
 mclient=mpd.MPDClient()
 conn=True
 sb=gtk.Statusbar()
+stlabel=gtk.Label('  ')
 
 eb1=gtk.EventBox() #play
 eb2=gtk.EventBox() #next
@@ -125,3 +126,6 @@ def fsdb():
 		return 3
 	sres.SRes(rs, plid, cid)
 	return 0
+	
+def clear_markup(l):
+	return l.replace('&amp;', '&').replace('<b>','').replace('</b>','').replace('<i>','').replace('</i>','')
