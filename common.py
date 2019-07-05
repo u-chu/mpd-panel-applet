@@ -31,7 +31,7 @@ eb4=gtk.EventBox() #stop
 eb5=gtk.EventBox() #pause
 
 def set_buttons_visible(status):
-	print status
+	#~ print status
 	if status=='stop':
 		eb1.show() #stop
 		eb2.hide()

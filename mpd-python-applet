@@ -21,7 +21,7 @@ import applet_settings
 
 #~ import a
 
-print gettext.install(common.APP_IND)
+gettext.install(common.APP_IND)
 gettext.bindtextdomain(gettext.find(common.APP_IND), common.DIR)
 gettext.textdomain(common.APP_IND)
 
@@ -275,6 +275,9 @@ def mpd_check_status():
 	global old_stat
 	global first_time
 	s=get_mpd_status()
+	#~ if (s != old_stat):
+		#~ print s, old_stat, s
+	common.set_buttons_visible(s)
 	if s=='pause' or s=='play':
 		t,p=get_mpd_pos()
 		#~ print t,p
@@ -290,7 +293,8 @@ def mpd_check_status():
 		cs=get_mpd_current()
 		cur_id=cs['id']
 		cur_s=cs['file']
-		#~ print cur_s, old_s		
+		#~ print cur_s, old_s
+		
 		if (cur_s != old_s) or ((s != old_stat) and s != 'stop'):			
 			title, album, artist, date=common.getrecords(cs)
 			icon=gtk.STOCK_MEDIA_PLAY
@@ -393,8 +397,8 @@ def applet_fill(applet):
 	
 	mpd_check_status()
 	status=get_mpd_status()
-	print status
-	common.set_buttons_visible(status)
+	#~ print status
+	#~ common.set_buttons_visible(status)
 	ftime_check(status)
 	#~ _IdleObject.__init__(None)
 	#~ return True
