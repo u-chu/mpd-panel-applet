@@ -233,6 +233,7 @@ common.eb3.connect('scroll-event', info_event)
 common.eb4.connect('scroll-event', info_event)
 pb5.connect('scroll-event', info_event)
 pb5.add(lb)
+#~ pb5.add(common.stlabel)
 pb5.connect('button_press_event', lb_click)
 pb5.connect('enter-notify-event', show_info)
 pb5.connect('leave-notify-event', hide_info)
@@ -257,9 +258,11 @@ def get_mpd_status():
 	else:
 		st=common.mclient.status()
 		if 'updating_db' in st.keys():
-			common.stlabel.set_markup('<b>U</b>')
+			common.stlabel.set_from_stock(gtk.STOCK_REFRESH, gtk.IconSize.MENU)
+			#~ common.stlabel.set_markup('<b> [U] </b>')
 		else:
-			common.stlabel.set_text('  ')
+			common.stlabel.set_from_stock(gtk.STOCK_DISCARD, gtk.IconSize.MENU)
+			#~ common.stlabel.set_text('     ')
 		#~ print common.mclient.status()
 		return st['state']
 	
@@ -382,6 +385,7 @@ def applet_fill(applet):
 	hb.pack_start(common.eb5, False, False, 0)
 	hb.pack_start(common.eb1, False, False, 0)
 	hb.pack_end(common.eb2, False, False, 0)
+	
 	applet.add(hb)
 	
 	#~ <menuitem name="Play/Pause" action="Play/Pause" />

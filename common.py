@@ -22,7 +22,8 @@ port=6600
 mclient=mpd.MPDClient()
 conn=True
 sb=gtk.Statusbar()
-stlabel=gtk.Label('  ')
+stlabel=gtk.Image()
+#~ gtk.Label('  ')
 
 eb1=gtk.EventBox() #play
 eb2=gtk.EventBox() #next
