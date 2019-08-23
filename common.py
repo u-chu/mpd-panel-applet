@@ -100,7 +100,7 @@ def make_dialog(s1):
 	dialog.set_default_response(gtk.ResponseType.OK)
 	dialog.show_all()
 	res=dialog.run()
-	txt=entry.get_text().encode('utf-8')
+	txt=entry.get_text().decode('utf-8', 'ignore')
 	dialog.destroy()
 	return [res, txt]
 	
