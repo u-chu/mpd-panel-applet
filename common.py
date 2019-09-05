@@ -78,10 +78,13 @@ def getrecords(i):
 		year=i['date']
 	except KeyError:
 		year = "Unknown Year"
-	lst=	[title, album, artist, year]
+	#~ lst=	[title, 
+	lst=[album, artist, year]
 	for i in lst:
 		if i.find('&')>0:
 			lst[lst.index(i)]=i.replace('&', '&amp;')
+	lst.insert(0, title)
+	#~ print lst
 	return lst
 	
 def mdisconnect():

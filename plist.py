@@ -49,8 +49,12 @@ class PL():
 		tc2.set_resizable(True)
 		tc2.set_min_width(250)
 		self.treeView.append_column(gtk.TreeViewColumn(_('Duration'),gtk.CellRendererText(), markup=2))
-		self.treeView.append_column(gtk.TreeViewColumn(_('Album'),gtk.CellRendererText(),  markup=3))
-		self.treeView.append_column(gtk.TreeViewColumn(_('Artist'),gtk.CellRendererText(), markup=4))
+		tcrt1=gtk.CellRendererText()
+		tcrt1.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
+		self.treeView.append_column(gtk.TreeViewColumn(_('Album'),tcrt1,  markup=3))
+		tcrt3=gtk.CellRendererText()
+		tcrt3.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
+		self.treeView.append_column(gtk.TreeViewColumn(_('Artist'),tcrt3, markup=4))
 		self.treeView.append_column(gtk.TreeViewColumn(_('Date'),gtk.CellRendererText(), markup=5))
 		#~ treeView.append_column(gtk.TreeViewColumn('Path',gtk.CellRendererText(), markup=6))
 		
@@ -93,8 +97,8 @@ class PL():
 		self.ag=gtk.ActionGroup.new("pl_ag")
 		
 		self.ag.add_actions(acts, None)
-		for i in self.ag.list_actions():
-			print i.get_name()
+		#~ for i in self.ag.list_actions():
+			#~ print i.get_name()
 		#~ print self.ag.list_actions()[0].get_name()
 		self.ag.list_actions()[0].set_sensitive(False)
 		self.ag.list_actions()[1].set_sensitive(False)
@@ -121,7 +125,7 @@ class PL():
 		self.sb=gtk.Statusbar()
 		self.sb.show_all()
 		vbox.pack_start(self.sb, False, False,0)
-		self.sb.set_has_resize_grip(False)
+		#~ self.sb.set_has_resize_grip(False)
 		#~ self.sb.set_shadow_type(gtk.SHADOW_NONE)
 		#~ vbox.pack_start(common.sb, False, False,0)
 		self.window.show_all()
@@ -160,7 +164,7 @@ class PL():
 		s.moverecs(e,1)
 		
 	def remove_item(s, e):
-		print e
+		#~ print e
 		m,i=s.treeView.get_selection().get_selected_rows()
 		b=[]
 		d=[]
@@ -213,6 +217,7 @@ class PL():
 			f=i['file']
 			if f==cid:
 				title='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, title)
+				#~ title=title.replace('&', '&amp;')
 				time1= '<b><span foreground=\"%s\">%s</span></b>'%(common.cp, time1)
 				album='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, album)
 				artist='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, artist)
@@ -222,7 +227,7 @@ class PL():
 				#~ print pimg
 			else:
 					f=os.path.dirname(f)
-			self.store.append([i['id'], title, time1, album, artist, date])
+			self.store.append([i['id'], title.replace('&', '&amp;'), time1, album, artist, date])
 		ctime=time.strftime(_("Play time: %H:%M:%S"), time.gmtime(float(ctime)))
 		self.sb.push(0,ctime)
 		#~ print len(self.store)
@@ -231,7 +236,7 @@ class PL():
 		
 		
 	def cstatus(self):
-		print len(self.store)
+		#~ print len(self.store)
 		self.ag.list_actions()[4].set_sensitive(len(self.store)>0)
 		llist=common.mclient.playlistid()
 		cs=common.mclient.currentsong()
@@ -257,15 +262,15 @@ class PL():
 	def on_activated(self, widget, row, col):
 		self.play_item(None, widget, row, col)
 		
-	def clear_markup(s, l):
-		return l.replace('&amp;', '&').replace('<b>','').replace('</b>','') 
+	#~ def clear_markup(s, l):
+		#~ return l.replace('&amp;', '&').replace('<b>','').replace('</b>','') 
 		
 	def quit(s, w, e):
 		common.mdisconnect()
 		gtk.main_quit()
 		
 if __name__=="__main__":
-	print gettext.install(common.APP_IND)
+	#~ print gettext.install(common.APP_IND)
 	#~ print gettext.find(common.APP_IND)
 	gettext.bindtextdomain(gettext.find(common.APP_IND), common.DIR)
 	gettext.textdomain(common.APP_IND)

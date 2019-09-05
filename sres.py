@@ -135,7 +135,7 @@ if __name__=="__main__":
 	gettext.textdomain(common.APP_IND)
 	#~ client = mpd.MPDClient()
 	#~ client.connect(common.addr, common.port)
-	rs=common.mclient.search('any','андем')
+	rs=common.mclient.search('any','мельница')
 	plid=common.mclient.playlistid()
 	cs=common.mclient.currentsong()
 	#~ client.close()

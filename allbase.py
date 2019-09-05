@@ -43,8 +43,10 @@ class DB():
 		tc1=gtk.TreeViewColumn(_('Title'),tcrt1, markup=1)
 		tc1.set_resizable(True)
 		tc1.set_min_width(350)
+		tcrt2=gtk.CellRendererText()
+		tcrt2.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
 		self.treeView.append_column(tc1)
-		self.treeView.append_column(gtk.TreeViewColumn(_('Artist'),gtk.CellRendererText(), markup=2))
+		self.treeView.append_column(gtk.TreeViewColumn(_('Artist'),tcrt2, markup=2))
 		tcrt3=gtk.CellRendererText()
 		tcrt3.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
 		tc3=gtk.TreeViewColumn(_('Album'),tcrt3, markup=3)
@@ -123,6 +125,9 @@ class DB():
 		#~ self.sb.push(3, '53')
 		#~ self.sb.pop(ci1)
 		#~ self.window.set_popup_menu(self.popupmenu)
+		self.sb=gtk.Statusbar()
+		self.sb.show_all()
+		vbox.pack_start(self.sb, False, False,0)
 		self.window.show_all()
 		self.window.set_focus(self.treeView)
 		
@@ -133,60 +138,32 @@ class DB():
 		common.fsdb()
 		
 	def on_changed_selection(s, e):
-		#~ print e
-		(m,i)=s.treeView.get_selection().get_selected_rows()
-		#~ print m, i
-		#~ print m, i[0]
+		m,i=s.treeView.get_selection().get_selected_rows()
 		try:
-			f= m[i[0]][0]
-			#~ print f
+			if len(i)>0:
+				f=m[0][0]
+			else:
+				f=None
 		except TypeError:
 			f=None
-		p=m[i[0]][1]
-		#~ print p
 		s.ag.list_actions()[1].set_sensitive(f==None)
 		s.ag.list_actions()[2].set_sensitive(m!=None and i!=None)
-		#~ common.sb.push(0, s.clear_markup(p))
 		
 	def fupd_sel(s, n):
 		a=s.treeView.get_selection()
 		m,i=a.get_selected_rows()
 		b=[]
 		d=[]
-		#~ print m, i
-		#~ try:
-		#~ print m.get_path(i)
 		for k in i:
-			#~ print k.prepend_index
-			#~ print m.get_path(k)
-			#~ print k[0]
-			print k
-			#~ k=int(k[0])
-			#~ print k, i[k]
 			f= m[k][0]
 			p= m[k][1]
 			b.append(f)
 			d.append(p)
-		#~ except: 
-			#~ f=None
-		#~ print b, d
-		#~ client = mpd.MPDClient()
-		#~ try:
-			#~ client.connect(common.addr, common.port)
-		#~ except:
-			#~ return
 		if not common.conn:
 			return
 		if f==None or len(b)<=0:
 			for z in d:
 				print z, common.mclient.update(common.clear_markup(z))
-				#~ .replace('&amp;', '&').replace('<b>','').replace('</b>',''))
-		#~ else:
-			#~ client.addid(f.replace('&amp;', '&'))
-		#~ client.close()
-		#~ client.disconnect()
-		#~ print dir(n)
-		#~ pass
 		
 	def confirm_add(self, s1):
 		dialog = gtk.MessageDialog(None, 0, gtk.MessageType.QUESTION, gtk.ButtonsType.YES_NO, _("Confirm add"))
@@ -236,6 +213,7 @@ class DB():
 		#~ print e, w
 			
 	def filltree(self, rd, tw):
+		print rd
 		#~ print tw
 		self.store.clear()
 		#~ client = mpd.MPDClient()
