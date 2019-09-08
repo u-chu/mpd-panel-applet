@@ -4,7 +4,7 @@
 import gi
 gi.require_version("Gtk", "2.0")
 
-from gi.repository import Gtk as gtk
+from gi.repository import Gtk as gtk, Pango as pango
 #~ import pygtk, gtk
 import mpd
 from gettext import gettext as _
@@ -27,21 +27,23 @@ class SRes():
 		tt=0
 		for i in rs:
 			title, album, artist, date=common.getrecords(i)
+			#~ if str([title,album,artist,date]).find('&'):
+				#~ print title,album,artist,date
 			f=i['file']
 			if f==cid:
-				title='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, title)
+				title=('<b><span foreground=\"%s\">%s</span></b>'%(common.cp, title)).replace('&', '&amp;')
 				#~ print title
 				album='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, album)
-				artist='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, artist)
+				artist='<b><i><span foreground=\"%s\">%s</span></i></b>'%(common.cp, artist)
 				date='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, date)
 				pimg=gtk.Image.new_from_stock(gtk.STOCK_MEDIA_PLAY, 16)
 				print pimg
 			else:	
 				for j in plid:				
 					if f == j['file']:
-						title='<b><span foreground=\"%s\">%s</span></b>'%(common.cc, title)
+						title=('<b><span foreground=\"%s\">%s</span></b>'%(common.cc, title)).replace('&', '&amp;')
 						#~ print title
-						album='<b><span foreground=\"%s\">%s</span></b>'%(common.cc, album)
+						album='<b><i><span foreground=\"%s\">%s</span></i></b>'%(common.cc, album)
 						artist='<b><span foreground=\"%s\">%s</span></b>'%(common.cc, artist)
 						date='<b><span foreground=\"%s\">%s</span></b>'%(common.cc, date)
 						#~ print title
@@ -52,11 +54,31 @@ class SRes():
 		#~ 		
 		self.window.add(vbox)
 		treeView.append_column(gtk.TreeViewColumn(''))
-		treeView.append_column(gtk.TreeViewColumn(_('Title'),gtk.CellRendererText(), markup=1))
-		treeView.append_column(gtk.TreeViewColumn(_('Album'),gtk.CellRendererText(),  markup=2))
-		treeView.append_column(gtk.TreeViewColumn(_('Artist'),gtk.CellRendererText(), markup=3))
+		crt1=gtk.CellRendererText()
+		crt1.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
+		tvc1=gtk.TreeViewColumn(_('Title'),crt1, markup=1)
+		tvc1.set_min_width(250)
+		tvc1.set_resizable(True)
+		treeView.append_column(tvc1)
+		crt2=gtk.CellRendererText()
+		crt2.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
+		tvc2=gtk.TreeViewColumn(_('Album'),crt2,  markup=2)
+		tvc2.set_min_width(80)
+		tvc2.set_resizable(True)
+		treeView.append_column(tvc2)
+		crt3=gtk.CellRendererText()
+		crt3.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
+		tvc3=gtk.TreeViewColumn(_('Artist'), crt3, markup=3)
+		tvc3.set_min_width(80)
+		tvc3.set_resizable(True)
+		treeView.append_column(tvc3)
 		treeView.append_column(gtk.TreeViewColumn(_('Date'),gtk.CellRendererText(), markup=4))
-		treeView.append_column(gtk.TreeViewColumn(_('Path'),gtk.CellRendererText(), markup=5))
+		crt5=gtk.CellRendererText()
+		crt5.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
+		tvc5=gtk.TreeViewColumn(_('Path'),crt5, markup=5)
+		tvc5.set_min_width(80)
+		tvc5.set_resizable(True)
+		treeView.append_column(tvc5)
 		acts=[
 		('add_items', gtk.STOCK_ADD, _('Add item(s)'), None, None, self.add_items),
 		]
@@ -98,6 +120,9 @@ class SRes():
 		#~ vbox.pack_end(self.lab, False, True,0)
 		treeView.connect("row-activated", self.on_activated)
 		treeView.get_selection().set_mode(gtk.SelectionMode.MULTIPLE)
+		self.sb=gtk.Statusbar()
+		self.sb.show_all()
+		vbox.pack_start(self.sb, False, False,0)
 		self.window.show_all()
 		
 	def add_items(s, e):
@@ -135,7 +160,8 @@ if __name__=="__main__":
 	gettext.textdomain(common.APP_IND)
 	#~ client = mpd.MPDClient()
 	#~ client.connect(common.addr, common.port)
-	rs=common.mclient.search('any','мельница')
+	common.mconnect()
+	rs=common.mclient.search('any','ария')
 	plid=common.mclient.playlistid()
 	cs=common.mclient.currentsong()
 	#~ client.close()

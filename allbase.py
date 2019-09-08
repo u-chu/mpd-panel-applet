@@ -337,6 +337,8 @@ class DB():
 if __name__=="__main__":
 	gettext.bindtextdomain(common.APP_IND+'.mo', common.DIR)
 	gettext.textdomain(common.APP_IND)
+	common.mconnect()
 	p=DB()
 	p.window.connect("delete_event", p.quit )
+	
 	gtk.main()

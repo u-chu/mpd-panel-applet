@@ -52,11 +52,11 @@ def set_buttons_visible(status):
 		eb2.show()
 		eb4.show()
 		
-		
-try:
-	mclient.connect(addr, port)
-except:
-	conn=False
+def mconnect():
+	try:
+		mclient.connect(addr, port)
+	except:
+		conn=False
 
 def getrecords(i):
 	try:

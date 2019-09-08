@@ -47,14 +47,18 @@ class PL():
 		tc2=gtk.TreeViewColumn(_('Title'),tcrt2, markup=1)
 		self.treeView.append_column(tc2)
 		tc2.set_resizable(True)
-		tc2.set_min_width(250)
+		tc2.set_min_width(150)
 		self.treeView.append_column(gtk.TreeViewColumn(_('Duration'),gtk.CellRendererText(), markup=2))
 		tcrt1=gtk.CellRendererText()
 		tcrt1.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
-		self.treeView.append_column(gtk.TreeViewColumn(_('Album'),tcrt1,  markup=3))
+		tc1=gtk.TreeViewColumn(_('Album'),tcrt1,  markup=3)
+		tc1.set_resizable(True)
+		self.treeView.append_column(tc1)
 		tcrt3=gtk.CellRendererText()
 		tcrt3.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
-		self.treeView.append_column(gtk.TreeViewColumn(_('Artist'),tcrt3, markup=4))
+		tc3=gtk.TreeViewColumn(_('Artist'),tcrt3, markup=4)
+		tc3.set_resizable(True)
+		self.treeView.append_column(tc3)
 		self.treeView.append_column(gtk.TreeViewColumn(_('Date'),gtk.CellRendererText(), markup=5))
 		#~ treeView.append_column(gtk.TreeViewColumn('Path',gtk.CellRendererText(), markup=6))
 		
@@ -216,8 +220,7 @@ class PL():
 			#~ print ctime
 			f=i['file']
 			if f==cid:
-				title='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, title)
-				#~ title=title.replace('&', '&amp;')
+				title=('<b><span foreground=\"%s\">%s</span></b>'%(common.cp, title)).replace('&', '&amp;')
 				time1= '<b><span foreground=\"%s\">%s</span></b>'%(common.cp, time1)
 				album='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, album)
 				artist='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, artist)
@@ -275,6 +278,7 @@ if __name__=="__main__":
 	gettext.bindtextdomain(gettext.find(common.APP_IND), common.DIR)
 	gettext.textdomain(common.APP_IND)
 	cid=''
+	common.mconnect()
 	cs=common.mclient.currentsong()
 	if len(cs)>0:
 		cid = common.mclient.currentsong()['file']
