@@ -12,18 +12,19 @@ from gi.repository import GdkPixbuf
 from gi.repository import GObject as gobject
 from gi.repository import Notify as pynotify
 #~ import mpd
-import time, os
+import time, os, sys
 from gettext import gettext as _
 import gettext
 import allbase
 import plist, common, sres
-import applet_settings
+import applet_settings, mainmodule
 
 #~ import a
 
 gettext.install(common.APP_IND)
 gettext.bindtextdomain(gettext.find(common.APP_IND), common.DIR)
 gettext.textdomain(common.APP_IND)
+common.mconnect()
 
 #~ eb5=gtk.EventBox() #pause
 #~ eb3=gtk.EventBox() #prev
@@ -34,79 +35,64 @@ pb5=gtk.EventBox() #
 
 pynotify.init(common.APP_IND)
 notif=pynotify.Notification()
+ma=mainmodule.MApplet()
 #~ first_time=True
 
-def fpause (s, e):
-	if not common.conn:
-		return common.not_connected
-	status=common.mclient.status()['state']
-	if status=='pause':
-		common.mclient.play()
-		common.set_buttons_visible('play')
-		#~ eb1.hide()
-		#~ eb5.show()
-	elif status=='play':
-		common.mclient.pause()
-		common.set_buttons_visible('pause')
-		#~ eb1.show()
-		#~ eb5.hide()
+#~ def fpause (s, e):
+	#~ if not common.conn:
+		#~ return common.not_connected
+	#~ status=common.mclient.status()['state']
+	#~ if status=='pause':
+		#~ common.mclient.play()
+		#~ common.set_buttons_visible('play')
+	#~ elif status=='play':
+		#~ common.mclient.pause()
+		#~ common.set_buttons_visible('pause')
 		
 	
-def fplay1(e):
-	fplay(None, e)
+#~ def fplay1(e):
+	#~ fplay(None, e)
 	
-def fplay (s, e):
-	if not common.conn:
-		return common.not_connected
-	status=common.mclient.status()['state']
-	if status=='pause' or status=='stop':
-		common.mclient.play()
-		common.set_buttons_visible('play')
-		#~ eb5.show()
-		#~ eb1.hide()
-		#~ eb3.show()
-		#~ eb2.show()
-		#~ eb4.show()
-	elif status=='play':
-		common.mclient.pause()
-		common.set_buttons_visible('pause')
-		#~ eb5.hide()
-		#~ eb1.show()
+#~ def fplay (s, e):
+	#~ if not common.conn:
+		#~ return common.not_connected
+	#~ status=common.mclient.status()['state']
+	#~ if status=='pause' or status=='stop':
+		#~ common.mclient.play()
+		#~ common.set_buttons_visible('play')
+	#~ elif status=='play':
+		#~ common.mclient.pause()
+		#~ common.set_buttons_visible('pause')
 		
 	
-def fnext1(n):
-	fnext(None, n)
+#~ def fnext1(n):
+	#~ fnext(None, n)
 	
-def fnext(s, n):
-	if not common.conn:
-		return common.not_connected
-	if common.mclient.status()['state']=='stop':
-		return common.player_stopped
-	common.mclient.next()
+#~ def fnext(s, n):
+	#~ if not common.conn:
+		#~ return common.not_connected
+	#~ if common.mclient.status()['state']=='stop':
+		#~ return common.player_stopped
+	#~ common.mclient.next()
 	
-def fprev1(n):
-	fprev(None, n)	
+#~ def fprev1(n):
+	#~ fprev(None, n)	
 	
-def fprev(s, n):
-	if not common.conn:
-		return common.not_connected
-	if common.mclient.status()['state']=='stop':
-		return common.player_stopped
-	common.mclient.previous()
+#~ def fprev(s, n):
+	#~ if not common.conn:
+		#~ return common.not_connected
+	#~ if common.mclient.status()['state']=='stop':
+		#~ return common.player_stopped
+	#~ common.mclient.previous()
 	
-def fstop1(n):
-	fstop(None, n)
+#~ def fstop1(n):
+	#~ fstop(None, n)
 	
-def fstop(s, n):
-	if not common.conn:
-		return common.not_connected
-	common.mclient.stop()
-	common.set_buttons_visible('stop')
-	#~ eb1.show() #stop
-	#~ eb2.hide()
-	#~ eb3.hide()
-	#~ eb4.hide()
-	#~ eb5.hide()
+#~ def fstop(s, n):
+	#~ if not common.conn:
+		#~ return common.not_connected
+	#~ common.mclient.stop()
+	#~ common.set_buttons_visible('stop')
 	
 def fsettings(e):
 	pass
@@ -153,13 +139,13 @@ def fplaylist(e):
 		
 def fdb(e):
 	allbase.DB()
-
+	
 acts=[
-	("fprev1", gtk.STOCK_MEDIA_PREVIOUS, _("Previous"), None, None, fprev1),
-	("fpause", gtk.STOCK_MEDIA_PAUSE, _("Pause"), None, None, fpause),
-	("fstop1", gtk.STOCK_MEDIA_STOP,_('Stop'), None, None, fstop1),
-	("fplay1", gtk.STOCK_MEDIA_PLAY,_("Play"), None, None, fstop1),
-	("fnext1", gtk.STOCK_MEDIA_NEXT,_('Next') , None, None, fplay),
+	("fprev1", gtk.STOCK_MEDIA_PREVIOUS, _("Previous"), None, None, ma.fprev1),
+	("fpause", gtk.STOCK_MEDIA_PAUSE, _("Pause"), None, None, ma.fpause),
+	("fstop1", gtk.STOCK_MEDIA_STOP,_('Stop'), None, None, ma.fstop1),
+	("fplay1", gtk.STOCK_MEDIA_PLAY,_("Play"), None, None, ma.fstop1),
+	("fnext1", gtk.STOCK_MEDIA_NEXT,_('Next') , None, None, ma.fplay),
 	("fsettings", gtk.STOCK_PROPERTIES, _("Settings"), None, None, fsettings),
 	("fsearchdb", gtk.STOCK_FIND, _("Search in DB"), None, None, fsearchdb),
 	('fplaylist', None, _('Playlist'), None, None, fplaylist),
@@ -354,6 +340,8 @@ def applet_fill(applet):
 	#~ global eb5
 	#~ global eb1
 	#~ global eb4
+	
+	
 	p=applet.get_preferences_path()
 	#~ print p
 	hb=gtk.HBox()	
@@ -413,7 +401,7 @@ def factory(applet, iid, data):
 	#~ if iid != "MpdPythonAppletFactory":
 		#~ print 1
 		#~ return False
-	common.mconnect()	
+	#~ common.mconnect()	
 	global old_s
 	global cur_s
 	global cur_stat
@@ -437,5 +425,14 @@ MatePanelApplet.Applet.factory_main("MpdPythonAppletFactory", True,
                                     factory, None)
 
 
-#~ if __name__=="__main__":
-	#~ main()
+if __name__=="__main__":
+	#~ print "dsdsd"
+	main_window = gtk.Window(gtk.WindowType.TOPLEVEL)
+	main_window.set_title("Applet")
+	main_window.connect("destroy", gtk.main_quit)
+	#~ app=MatePanelApplet.Applet()
+	#~ factory(app, None, 0)
+	#~ app.reparent(main_window)
+	main_window.show_all()
+	gtk.main()
+	sys.exit()
