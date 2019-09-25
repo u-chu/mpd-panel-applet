@@ -9,7 +9,7 @@ from gi.repository import Gtk as gtk, Pango as pango
 import mpd
 from gettext import gettext as _
 import gettext, os
-import common
+import common, props
 
 
 class SRes():
@@ -18,6 +18,7 @@ class SRes():
 		self.window.set_title(_('Search results'))
 		self.window.set_size_request(640, 480)
 		self.window.move(50,50)
+		self.rs=rs
 		vbox = gtk.VBox(False, 0)
 		sw2=gtk.ScrolledWindow()
 		sw2.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.ALWAYS)
@@ -81,11 +82,14 @@ class SRes():
 		treeView.append_column(tvc5)
 		acts=[
 		('add_items', gtk.STOCK_ADD, _('Add item(s)'), None, None, self.add_items),
+		('f_info', gtk.STOCK_INFO, _('Info'), None, None, self.f_info)
 		]
 		xmlmenus="""
 		<ui>
 			<toolbar name='maintb'>
 				<toolitem action='add_items' />
+				<separator />
+				<toolitem action='f_info' />
 			</toolbar>
 			<menubar name='mainmenu'>
 				<menuitem action='add_items' />
@@ -124,6 +128,13 @@ class SRes():
 		self.sb.show_all()
 		vbox.pack_start(self.sb, False, False,0)
 		self.window.show_all()
+		
+	def f_info(s, e):
+		m,i=s.window.get_focus().get_selection().get_selected_rows()
+		#~ llist=common.mclient.playlistid()
+		k=int(str(i[0]))
+		idc=s.rs[k]
+		props.ShowProperties(idc)	
 		
 	def add_items(s, e):
 		#~ print s.treeView.get_selection().get_selected_rows()

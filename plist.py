@@ -11,7 +11,7 @@ from gi.repository import GObject as gobject, Pango as pango
 import time, os
 from gettext import gettext as _
 import gettext
-import common
+import common, props
 #~ APP_IND='MpdPythonAppletFactory'
 #~ DIR="locale"
 #` addr='localhost'
@@ -75,6 +75,7 @@ class PL():
 		('r_down', gtk.STOCK_GO_DOWN, _('Move item(s) down'), '<Control>b', None, self.r_down),
 		('r_up', gtk.STOCK_GO_UP, _('Move item(s) up'), '<Control>g', None, self.r_up),
 		('c_all', gtk.STOCK_CLEAR, _('Clear all'), None, None, self.c_all),
+		('f_info', gtk.STOCK_INFO, _('Info'), None, None, self.f_info)
 		]
 		xmlmenus="""
 		<ui>
@@ -84,6 +85,8 @@ class PL():
 				<toolitem action='r_down' />
 				<toolitem action='r_up' />
 				<toolitem action='c_all' />
+				<separator />
+				<toolitem action='f_info' />
 			</toolbar>
 			<menubar name='mainmenu'>
 				<menuitem action='r_up' />
@@ -151,7 +154,15 @@ class PL():
 		common.mclient.clear()
 		self.ag.list_actions()[4].set_sensitive(False)
 		s.cstatus()
-			
+		
+	def f_info(s, e):
+		m,i=s.treeView.get_selection().get_selected_rows()
+		llist=common.mclient.playlistid()
+		k=int(str(i[0]))
+		idc=llist[k]
+		props.ShowProperties(idc)
+		#~ print idc
+		
 	def moverecs(s,e, t):
 		m,i=s.treeView.get_selection().get_selected_rows()
 		llist=common.mclient.playlistid()
@@ -230,9 +241,17 @@ class PL():
 				#~ print pimg
 			else:
 					f=os.path.dirname(f)
+			#~ print type(ctime)		
+			if ctime>=86400:
+				ct=time.strftime(_("Play time: %d:%H:%M:%S"), time.gmtime(float(ctime)))
+			elif ctime>3600:
+				ct=time.strftime(_("Play time: %H:%M:%S"), time.gmtime(float(ctime)))
+			else:
+				ct=time.strftime(_("Play time: %M:%S"), time.gmtime(float(ctime)))
+				
 			self.store.append([i['id'], title.replace('&', '&amp;'), time1, album, artist, date])
-		ctime=time.strftime(_("Play time: %H:%M:%S"), time.gmtime(float(ctime)))
-		self.sb.push(0,ctime)
+		
+		self.sb.push(0,ct)
 		#~ print len(self.store)
 		
 		#~ self.pbar.set_text(time.strftime("%H:%M:%S", time.gmtime(ctime)))

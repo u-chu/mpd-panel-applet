@@ -16,7 +16,7 @@ import time, os, sys
 from gettext import gettext as _
 import gettext
 import allbase
-import plist, common, sres
+import plist, common, sres, props
 import applet_settings, mainmodule
 
 #~ import a
@@ -97,6 +97,9 @@ ma=mainmodule.MApplet()
 def fsettings(e):
 	pass
 	
+def finfo(e):
+	props.ShowProperties(common.mclient.currentsong())
+	
 	
 def fsearchdb(e):
 	common.fsdb()
@@ -150,6 +153,7 @@ acts=[
 	("fsearchdb", gtk.STOCK_FIND, _("Search in DB"), None, None, fsearchdb),
 	('fplaylist', None, _('Playlist'), None, None, fplaylist),
 	('fdb', None, _('DB'), None, None, fdb),
+	('finfo', gtk.STOCK_INFO, _('Current track info'), None, None, finfo),
 	]
 propxml="""
 			<menuitem name="fprev1" action="fprev1" />			
@@ -162,6 +166,7 @@ propxml="""
 			<menuitem name="fdb" action="fdb" />
 			
 			<menuitem name="fsearchdb" action="fsearchdb"/>
+			<menuitem name='finfo' action='finfo' />
 			<separator />
 			<menuitem name="fsettings" action="fsettings" />
 			"""
@@ -242,6 +247,10 @@ old_stat=''
 
 def get_mpd_status():
 	if common.conn==False:
+		#~ ab=gtk.AboutDialog()
+		#~ ab.ProgramName = "get_mpd_status";
+		#~ ab.Version = "0.1";
+		#~ ab.Copyright = "(c) Jan Bodnar";
 		return ''
 	else:
 		st=common.mclient.status()
@@ -348,23 +357,23 @@ def applet_fill(applet):
 	b1=gtk.Image(stock=gtk.STOCK_MEDIA_PLAY)
 	#~ eb1= 
 	common.eb1.add(b1)
-	common.eb1.connect('button-release-event', fplay)	
+	common.eb1.connect('button-release-event', ma.fplay)	
 	b2=gtk.Image(stock=gtk.STOCK_MEDIA_NEXT)
 	#~ eb2=gtk.EventBox()
 	common.eb2.add(b2)
-	common.eb2.connect('button-release-event', fnext)
+	common.eb2.connect('button-release-event', ma.fnext)
 	b3=gtk.Image(stock=gtk.STOCK_MEDIA_PREVIOUS)
 	#~ eb3=gtk.EventBox()
 	common.eb3.add(b3)
-	common.eb3.connect('button-release-event', fprev)
+	common.eb3.connect('button-release-event', ma.fprev)
 	b4=gtk.Image(stock=gtk.STOCK_MEDIA_STOP)
 	#~ eb4=gtk.EventBox()
 	common.eb4.add(b4)
-	common.eb4.connect('button-release-event', fstop)
+	common.eb4.connect('button-release-event', ma.fstop)
 	b5=gtk.Image(stock=gtk.STOCK_MEDIA_PAUSE)
 	#~ eb5=gtk.EventBox()
 	common.eb5.add(b5)
-	common.eb5.connect('button-release-event', fpause)
+	common.eb5.connect('button-release-event', ma.fpause)
 
 	#~ hb.pack_start(cl, False, False, 0)
 	hb.pack_start(pb5, False, False, 2)
@@ -398,6 +407,7 @@ def applet_fill(applet):
 	#~ return True
 		
 def factory(applet, iid, data):
+	#~ print applet
 	#~ if iid != "MpdPythonAppletFactory":
 		#~ print 1
 		#~ return False
@@ -424,15 +434,3 @@ MatePanelApplet.Applet.factory_main("MpdPythonAppletFactory", True,
                                     MatePanelApplet.Applet.__gtype__,
                                     factory, None)
 
-
-if __name__=="__main__":
-	#~ print "dsdsd"
-	main_window = gtk.Window(gtk.WindowType.TOPLEVEL)
-	main_window.set_title("Applet")
-	main_window.connect("destroy", gtk.main_quit)
-	#~ app=MatePanelApplet.Applet()
-	#~ factory(app, None, 0)
-	#~ app.reparent(main_window)
-	main_window.show_all()
-	gtk.main()
-	sys.exit()

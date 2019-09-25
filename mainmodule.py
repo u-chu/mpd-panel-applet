@@ -60,7 +60,7 @@ class MApplet():
 		
 
 		
-	def fpause (s, e):
+	def fpause (s, e, w):
 		if not common.conn:
 			return common.not_connected
 		status=common.mclient.status()['state']
@@ -76,10 +76,10 @@ class MApplet():
 			#~ eb5.hide()
 		
 	
-	def fplay1(e):
-		fplay(None, e)
+	def fplay1(s, e):
+		s.fplay(None, e)
 	
-	def fplay (s, e):
+	def fplay (s, e, w):
 		if not common.conn:
 			return common.not_connected
 		status=common.mclient.status()['state']
@@ -98,30 +98,30 @@ class MApplet():
 			#~ eb1.show()
 		
 	
-	def fnext1(n):
-		fnext(None, n)
+	def fnext1(s, n):
+		s.fnext(None, n)
 	
-	def fnext(s, n):
+	def fnext(s, n, w):
 		if not common.conn:
 			return common.not_connected
 		if common.mclient.status()['state']=='stop':
 			return common.player_stopped
 		common.mclient.next()
 	
-	def fprev1(n):
-		fprev(None, n)	
+	def fprev1(s, n):
+		s.fprev(None, n)	
 	
-	def fprev(s, n):
+	def fprev(s, n, w):
 		if not common.conn:
 			return common.not_connected
 		if common.mclient.status()['state']=='stop':
 			return common.player_stopped
 		common.mclient.previous()
 	
-	def fstop1(n):
-		fstop(None, n)
+	def fstop1(s, n):
+		s.fstop(None, n)
 	
-	def fstop(s, n):
+	def fstop(s, n, w):
 		if not common.conn:
 			return common.not_connected
 		common.mclient.stop()
@@ -139,7 +139,7 @@ class MApplet():
 		#~ common.fsdb()
 	
 	
-	def fplaylist(e):
+	def fplaylist(s, e):
 		if not common.conn:
 			return
 		plid=common.mclient.playlistid()
@@ -155,7 +155,7 @@ class MApplet():
 	def fdb(e):
 		allbase.DB()	
 		
-	def get_mpd_status():
+	def get_mpd_status(s):
 		if common.conn==False:
 			return ''
 		else:
@@ -169,14 +169,14 @@ class MApplet():
 			#~ print common.mclient.status()
 			return st['state']
 	
-	def get_mpd_current():
+	def get_mpd_current(s):
 		if common.conn==False:
 			return ''
 		else:
 			return common.mclient.currentsong()	
 		
 	
-	def mpd_check_status():
+	def mpd_check_status(s):
 		#~ global old_s
 		#~ global cur_s
 		#~ global old_stat
@@ -219,7 +219,7 @@ class MApplet():
 		#~ print 'mpd_check_status'
 		return True
 		
-	def show_info(w,e):
+	def show_info(s, w,e):
 		if common.conn==False or get_mpd_status()=='stop':
 			return
 		cs=common.mclient.currentsong()
@@ -233,7 +233,7 @@ class MApplet():
 		notif.update(title, message, icon)
 		notif.show()
 	
-	def hide_info(w,e):
+	def hide_info(s, w,e):
 		#~ print dir(notif)
 		#~ print notif.get_server_info()
 		try:
@@ -241,7 +241,7 @@ class MApplet():
 		except: pass	
 		
 	
-	def info_event(icon, event):
+	def info_event(s, icon, event):
 		if not common.conn:
 			return
 		cvol=int(common.mclient.status()['volume'])
@@ -254,7 +254,7 @@ class MApplet():
 		notif.show()	
 		
 		
-	def get_mpd_pos():
+	def get_mpd_pos(s):
 		if common.conn==False:
 			return '',''
 		else:
@@ -265,8 +265,8 @@ class MApplet():
 	def ftime_check(s):
 		pass
 	
-	def showAboutDialog(*arguments, **keywords):
-		pass
+	#~ def showAboutDialog(*arguments, **keywords):
+		#~ pass
 		#~ subprocess.call("mate-about")
 		
 if __name__=="__main__":
