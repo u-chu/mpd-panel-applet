@@ -158,10 +158,13 @@ class PL():
 	def f_info(s, e):
 		m,i=s.treeView.get_selection().get_selected_rows()
 		llist=common.mclient.playlistid()
-		k=int(str(i[0]))
-		idc=llist[k]
+		if i==[]:
+			idc=common.mclient.currentsong()
+		else:
+			k=int(str(i[0]))
+			idc=llist[k]
 		props.ShowProperties(idc)
-		#~ print idc
+		
 		
 	def moverecs(s,e, t):
 		m,i=s.treeView.get_selection().get_selected_rows()
