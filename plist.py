@@ -33,8 +33,10 @@ class PL():
 		vbox = gtk.VBox(False)
 		sw2=gtk.ScrolledWindow()
 		sw2.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.ALWAYS)
-		self.store=gtk.ListStore(object, str,str,str,str, str)
+		self.store=gtk.ListStore(object, str,str,str)
 		self.treeView = gtk.TreeView(model=self.store)
+		self.treeView.set_rubber_banding(True)
+		self.treeView.get_selection().set_mode(gtk.SelectionMode.MULTIPLE)
 		#~ ts1=
 		self.treeView.get_selection().connect('changed', self.on_changed_selection)
 		#~ self.pbar = gtk.ProgressBar()
@@ -44,22 +46,31 @@ class PL():
 		self.treeView.append_column(gtk.TreeViewColumn(''))
 		tcrt2=gtk.CellRendererText()
 		tcrt2.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
-		tc2=gtk.TreeViewColumn(_('Title'),tcrt2, markup=1)
+		tc2=gtk.TreeViewColumn(_('Title'),tcrt2, markup=1, width=-1)
 		self.treeView.append_column(tc2)
 		tc2.set_resizable(True)
-		tc2.set_min_width(150)
-		self.treeView.append_column(gtk.TreeViewColumn(_('Duration'),gtk.CellRendererText(), markup=2))
+		tc2.set_min_width(200)
+		tcrt4=gtk.CellRendererText()
+		tcrt4.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
+		tc4=gtk.TreeViewColumn(_('Album'),tcrt4, markup=2, width=150)
+		tc4.set_resizable(True)
+		tc4.set_min_width(150)
+		self.treeView.append_column(tc4)
 		tcrt1=gtk.CellRendererText()
 		tcrt1.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
-		tc1=gtk.TreeViewColumn(_('Album'),tcrt1,  markup=3)
+		tc1=gtk.TreeViewColumn(_('Artist'),tcrt1,  markup=3, width=150)
 		tc1.set_resizable(True)
+		tc1.set_min_width(150)
 		self.treeView.append_column(tc1)
-		tcrt3=gtk.CellRendererText()
-		tcrt3.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
-		tc3=gtk.TreeViewColumn(_('Artist'),tcrt3, markup=4)
-		tc3.set_resizable(True)
-		self.treeView.append_column(tc3)
-		self.treeView.append_column(gtk.TreeViewColumn(_('Date'),gtk.CellRendererText(), markup=5))
+		#~ tcrt3=gtk.CellRendererText()
+		#~ tcrt3.set_property('ellipsize', pango.EllipsizeMode.MIDDLE)
+		#~ tc3=gtk.TreeViewColumn(_('Date'),tcrt3, markup=4, width=50)
+		#~ tc3.set_resizable(True)
+		#~ tc3.set_min_width(50)
+		#~ self.treeView.append_column(tc3)
+		#~ tc5=gtk.TreeViewColumn(_('Date'),gtk.CellRendererText(), markup=5)
+		#~ tc5.set_min_width(-1)
+		#~ self.treeView.append_column(tc5)
 		#~ treeView.append_column(gtk.TreeViewColumn('Path',gtk.CellRendererText(), markup=6))
 		
 		sw2.add(self.treeView)
@@ -164,16 +175,41 @@ class PL():
 			k=int(str(i[0]))
 			idc=llist[k]
 		props.ShowProperties(idc)
+
+
+	def moverecs(s, e, t):
+		m,i=s.treeView.get_selection().get_selected_rows()
+		b=[]
+		llist=common.mclient.playlistid()
+		for k in i:
+			k=int(k.to_string())
+			
+			f= int(llist[k]['id'])
+			b.append((k,f))
+		if (t>0):
+			b.reverse()
+		for a in b:
+			common.mclient.moveid(a[1], a[0]+t)
+		s.cstatus()
+		v=int(str(b[len(b)-1][0]+t))
+		s.treeView.set_cursor(v)
+		if len(b)>1:
+			#~ print type(v)
+			s.treeView.get_selection().select_range(gtk.TreePath(v), gtk.TreePath(v-len(i)+1))		
 		
-		
-	def moverecs(s,e, t):
+	def moverecs2(s,e, t):
 		m,i=s.treeView.get_selection().get_selected_rows()
 		llist=common.mclient.playlistid()
 		k=int(str(i[0]))
+		print dir(i[0])
 		idc=int(llist[k]['id'])
 		#~ print idc, k, t
 		common.mclient.moveid(idc, k+t)
 		s.cstatus()
+		if t<0:
+			s.treeView.set_cursor(k-1)
+		else:
+			s.treeView.set_cursor(k+1)
 			
 	def r_up(s, e):
 		s.moverecs(e,-1)
@@ -222,6 +258,8 @@ class PL():
 		self.store.clear()
 		ctime=0
 		self.slist=rs
+		ct=''
+		tim=-1
 		for i in rs:
 			title, album, artist, date=common.getrecords(i)
 			#~ path=i['file']
@@ -229,13 +267,20 @@ class PL():
 			try:	
 				tim=float(time1)
 				ctime+=tim
-			except: pass	
-			time1=time.strftime("%H:%M:%S", time.gmtime(float(time1)))
+			except: pass
+			if tim>0:
+				if tim>86400:
+					time1=time.strftime("%d:%H:%M:%S", time.gmtime(tim))
+				elif tim>3600:
+					time1=time.strftime("%H:%M:%S", time.gmtime(tim))
+				else:
+					time1=time.strftime("%M:%S", time.gmtime(tim))
 			#~ print ctime
 			f=i['file']
 			if f==cid:
-				title=('<b><span foreground=\"%s\">%s</span></b>'%(common.cp, title)).replace('&', '&amp;')
-				time1= '<b><span foreground=\"%s\">%s</span></b>'%(common.cp, time1)
+				title=('<span foreground=\"%s\"><b>%s</b></span>'
+					%(common.cp, title)).replace('&', '&amp;')
+				#~ time1= '<b><span foreground=\"%s\">%s</span></b>'%(common.cp, time1)
 				album='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, album)
 				artist='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, artist)
 				date='<b><span foreground=\"%s\">%s</span></b>'%(common.cp, date)
@@ -251,8 +296,8 @@ class PL():
 				ct=time.strftime(_("Play time: %H:%M:%S"), time.gmtime(float(ctime)))
 			else:
 				ct=time.strftime(_("Play time: %M:%S"), time.gmtime(float(ctime)))
-				
-			self.store.append([i['id'], title.replace('&', '&amp;'), time1, album, artist, date])
+			#~ print ct	
+			self.store.append([i['id'], "%s (%s)"%(title.replace('&', '&amp;'), time1), "%s (%s)"%(album, date), artist])
 		
 		self.sb.push(0,ct)
 		#~ print len(self.store)
